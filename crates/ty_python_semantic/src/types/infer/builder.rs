@@ -8107,8 +8107,8 @@ impl<'db, 'ast> TypeInferenceBuilder<'db, 'ast> {
             return None;
         };
 
-        let constraints = ConstraintSetBuilder::new();
         let inferable = generic_context.inferable_typevars(db);
+        let constraints = ConstraintSetBuilder::new();
         let identity_instance = Type::instance(db, env, ClassType::Generic(collection_alias));
         let mut builder = SpecializationBuilder::new(db, env, &constraints, generic_context);
 
