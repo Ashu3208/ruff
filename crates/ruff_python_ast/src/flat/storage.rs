@@ -33,12 +33,7 @@ unsafe impl Sync for NodeStorage {}
 
 impl Default for NodeStorage {
     fn default() -> Self {
-        Self {
-            rows: NonNull::dangling(),
-            ranges: NonNull::dangling(),
-            len: 0,
-            capacity: 0,
-        }
+        Self::empty()
     }
 }
 
@@ -69,6 +64,15 @@ impl get_size2::GetSize for NodeStorage {
 }
 
 impl NodeStorage {
+    pub(super) const fn empty() -> Self {
+        Self {
+            rows: NonNull::dangling(),
+            ranges: NonNull::dangling(),
+            len: 0,
+            capacity: 0,
+        }
+    }
+
     fn layout(capacity: usize) -> Layout {
         capacity
             .checked_mul(BYTES_PER_SLOT)

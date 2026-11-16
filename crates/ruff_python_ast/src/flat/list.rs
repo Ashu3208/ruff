@@ -718,7 +718,7 @@ impl<E> Clone for List<'_, E> {
 
 impl<E: Element> Default for List<'_, E> {
     fn default() -> Self {
-        static EMPTY: std::sync::LazyLock<Ast> = std::sync::LazyLock::new(Ast::default);
+        static EMPTY: Ast = Ast::empty();
         Self::new(&EMPTY, 0)
     }
 }

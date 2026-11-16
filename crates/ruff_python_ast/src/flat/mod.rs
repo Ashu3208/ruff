@@ -551,7 +551,7 @@ impl RowKeys {
 
 /// Each syntax node occupies one row. Variable-length fields live in the side tables.
 /// Variable-length fields and fields that do not fit inline refer to the extra-data arena.
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Debug)]
 #[cfg_attr(feature = "get-size", derive(get_size2::GetSize))]
 pub struct Ast {
     nodes: NodeStorage,
@@ -564,7 +564,26 @@ pub struct Ast {
     keys: RowKeys,
 }
 
+impl Default for Ast {
+    fn default() -> Self {
+        Self::empty()
+    }
+}
+
 impl Ast {
+    const fn empty() -> Self {
+        Self {
+            nodes: NodeStorage::empty(),
+            extra: Vec::new(),
+            text: String::new(),
+            names: Vec::new(),
+            bytes: Vec::new(),
+            numbers: Vec::new(),
+            debug_text: Vec::new(),
+            keys: RowKeys::Unindexed,
+        }
+    }
+
     /// Whether an identifier with this normalized spelling occurs in the tree.
     /// This scans the distinct names interned during parsing.
     pub fn contains_identifier(&self, spelling: &str) -> bool {
