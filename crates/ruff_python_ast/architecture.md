@@ -161,19 +161,6 @@ as happens when a module starts with a long docstring. A dense prefix can also p
 comment. The builder caps speculative growth at one MiB per buffer. A full row buffer still
 grows by at least one quarter of its length to keep repeated reallocations amortized.
 
-A function's body occupies a contiguous interval of rows before the function's own row. The
-parser records the length of that interval in two unused bytes of the function row. The arena
-also records the position of its last `yield` or `yield from`. If that position precedes the
-body, or the arena has no yields, Ruff can rule out a generator without reading any body rows.
-If the last yield comes later, Ruff scans the body's row tags. A match can belong to a nested
-scope, so Ruff follows child handles to decide whether the function itself yields.
-
-Without a yield, the return collector can stop scanning the rows at the first `return` and visit
-only statements to collect returns in source order. Functions with more than 65,535 body rows
-and functions copied into a new arena have no recorded body interval. They use a scope-aware walk
-when the arena contains a yield. PLR0911 walks its function body directly and skips nested
-classes and functions.
-
 After parsing, the tree owns the rows and side tables. The builder releases its scratch buffers
 and name lookup table. Returning a child view borrows the same tree. Freeing the tree releases
 the rows and side tables without recursively dropping statements or expressions.

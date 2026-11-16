@@ -2133,10 +2133,9 @@ impl<'src> Parser<'src> {
         // def foo():
         // def foo() -> int:
         // x = 42
-        let body_start = self.storage.node_count();
         let body = self.parse_body(Clause::FunctionDef);
 
-        let function = build::StmtFunctionDef {
+        build::StmtFunctionDef {
             name: name.id,
             type_params: type_params.map(|node| node.id),
             parameters: parameters.id,
@@ -2146,9 +2145,7 @@ impl<'src> Parser<'src> {
             returns: returns.map(|node| node.id),
             range: self.node_range(start),
         }
-        .parsed(&mut self.storage);
-        self.storage.record_function_body(function.id, body_start);
-        function
+        .parsed(&mut self.storage)
     }
 
     /// Parses a class definition.

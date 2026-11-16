@@ -3,7 +3,6 @@ use ruff_python_ast::{BuildId, Builder, ListId};
 use rustc_hash::FxHashSet;
 
 use ruff_python_ast::StmtFunctionDef;
-use ruff_python_ast::helpers::ReturnStatementVisitor;
 use ruff_python_ast::visitor::{self, Visitor};
 use ruff_python_ast::{self as ast, Expr, ExprKind, Stmt, StmtKind};
 use ruff_python_semantic::analyze::terminal::Terminal;
@@ -53,15 +52,16 @@ pub(crate) fn auto_return_type(
     semantic: &SemanticModel,
 ) -> Option<AutoPythonType> {
     // Collect all the `return` statements.
-    let returns = if function.body_may_contain_yield() {
+    let returns = {
         let mut visitor = ReturnTypeVisitor::default();
         visitor.visit_body(function.body());
+
+        // Ignore generators.
         if visitor.is_generator {
             return None;
         }
+
         visitor.returns
-    } else {
-        ReturnStatementVisitor::for_function(function).returns
     };
 
     // Determine the terminal behavior (i.e., implicit return, no return, etc.).

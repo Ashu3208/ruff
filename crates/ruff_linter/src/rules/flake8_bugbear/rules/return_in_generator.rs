@@ -95,10 +95,6 @@ impl Violation for ReturnInGenerator {
 
 /// B901
 pub(crate) fn return_in_generator(checker: &Checker, function_def: &StmtFunctionDefFields<'_>) {
-    if !function_def.node.body_may_contain_yield() {
-        return;
-    }
-
     if function_def.name.id() == "__await__" {
         return;
     }

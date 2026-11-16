@@ -56,10 +56,6 @@ pub(crate) fn stop_iteration_return(
     checker: &Checker,
     function_def: &ast::StmtFunctionDefFields<'_>,
 ) {
-    if !function_def.node.body_may_contain_yield() {
-        return;
-    }
-
     let mut analyzer = GeneratorAnalyzer {
         checker,
         has_yield: false,

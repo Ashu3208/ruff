@@ -746,8 +746,7 @@ fn create_stack<'a>(checker: &'a Checker, function_def: StmtFunctionDef<'a>) -> 
 
     // Traverse the function body, to collect the stack.
     let stack = {
-        let mut visitor =
-            ReturnVisitor::new(checker.semantic(), function_def.body_may_contain_yield());
+        let mut visitor = ReturnVisitor::new(checker.semantic());
         for stmt in body {
             visitor.visit_stmt(stmt);
         }
