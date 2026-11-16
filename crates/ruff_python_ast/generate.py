@@ -1101,7 +1101,7 @@ def generate_flat(ast: Ast) -> tuple[str, str]:
             f"(builder.{method}(self.range, [{parameters}]), self.range, crate::NodeKind::{n.name}) }} }}"
         )
         mutable = "mut " if fields else ""
-        out.append(f"let {mutable}row = Row::new(NodeKind::{n.name}, range);")
+        out.append(f"let {mutable}row = Row::new(NodeKind::{n.name});")
         if paired_lists:
             out.append(
                 f"let [{parameters}] = super::list::Interval::pack_pair(&mut self.ast.extra, [{parameters}]);"
@@ -1128,7 +1128,7 @@ def generate_flat(ast: Ast) -> tuple[str, str]:
                     if field.width == 8:
                         words.append(f"split_words({field.name})[1]")
             out.append("self.ast.extra.extend([" + ", ".join(words) + "]);")
-        out.append("self.push(row) } }")
+        out.append("self.push(row, range) } }")
         if fields:
             generics, lifetime = (
                 ("<'a>", "'a") if any("'a" in f.result for f in fields) else ("", "'_")

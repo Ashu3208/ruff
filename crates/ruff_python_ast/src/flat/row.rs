@@ -4,8 +4,6 @@
 use std::fmt;
 use std::mem::offset_of;
 
-use ruff_text_size::{Ranged, TextRange};
-
 use crate::NodeKind;
 
 use super::children::{Children, Field, Pending, StatementLists};
@@ -23,11 +21,10 @@ struct TaggedBytes {
 #[repr(C)]
 pub(super) struct Row {
     payload: Payload,
-    span: TextRange,
 }
 
 impl Row {
-    pub(super) const fn new(kind: NodeKind, span: TextRange) -> Self {
+    pub(super) const fn new(kind: NodeKind) -> Self {
         Self {
             payload: Payload {
                 raw: TaggedBytes {
@@ -35,7 +32,6 @@ impl Row {
                     kind,
                 },
             },
-            span,
         }
     }
 
@@ -47,10 +43,6 @@ impl Row {
         unsafe {
             self.payload.raw.kind
         }
-    }
-
-    pub(super) fn set_range(&mut self, span: TextRange) {
-        self.span = span;
     }
 
     /// Borrows adjacent child handles in source order. An absent optional endpoint
@@ -96,17 +88,10 @@ impl Row {
     }
 }
 
-impl Ranged for Row {
-    fn range(&self) -> TextRange {
-        self.span
-    }
-}
-
 impl fmt::Debug for Row {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Row")
             .field("kind", &self.kind())
-            .field("span", &self.range())
             .finish_non_exhaustive()
     }
 }
@@ -168,16 +153,16 @@ include!("row/generated.rs");
 const _: () = {
     assert!(size_of::<NodeKind>() == 1 && offset_of!(TaggedBytes, kind) == 15);
     assert!(size_of::<TaggedBytes>() == 16 && size_of::<Payload>() == 16);
-    assert!(offset_of!(Row, span) == 16 && size_of::<Row>() == 24 && align_of::<Row>() == 8);
+    assert!(size_of::<Row>() == 16 && align_of::<Row>() == 8);
 };
 
 #[cfg(test)]
 mod tests {
-    use super::{NodeKind, Row, TextRange};
+    use super::{NodeKind, Row};
 
     #[test]
     fn updating_a_function_flag_preserves_the_name_and_kind() {
-        let mut row = Row::new(NodeKind::StmtFunctionDef, TextRange::default());
+        let mut row = Row::new(NodeKind::StmtFunctionDef);
         row.set_stmt_function_def_name(42);
         row.set_stmt_function_def_is_async(1);
 

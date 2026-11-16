@@ -23,8 +23,8 @@ corresponding borrowed node. IDs are local to a particular parse.
 
 An ID stores the node's physical slot as a `NonZeroU32`. The builder reserves slot 0 for
 an absent child, so `Option<AstNodeId<T>>` occupies the same four bytes as `AstNodeId<T>`.
-Each parsed arena, including a separately parsed string annotation, pays for one unused
-24-byte row. Allocation indices are zero-based. The first node occupies physical slot 1,
+Each parsed arena, including a separately parsed string annotation, reserves one unused
+row and source range (24 bytes total). Allocation indices are zero-based. The first node occupies physical slot 1,
 has `id.index() == 0`, and is returned by `ast.row(0)`. `ast.len()` counts stored nodes
 and `ast.any_node(predicate)` scans them, including rows retained by parser recovery.
 Both skip the reserved slot. Use `root.descendants()` to walk the reachable tree in source order.
@@ -77,10 +77,11 @@ node. Use the node’s generated accessor when only one field is needed.
 
 ## Row layout
 
-Each row occupies 24 bytes, with a 16-byte union followed by an eight-byte source span. The
-first 15 bytes hold naturally aligned integer fields for the node's kind. The last byte holds
-the kind itself. A visitor can read the kind and span from the row it already borrows.
-The parser appends each completed node in one operation.
+Each node occupies a 16-byte row and an eight-byte source range. The first 15 bytes of the
+row hold naturally aligned integer fields. The last byte holds the node's kind. Rows occupy
+the first part of a shared allocation and source ranges occupy the second. The parser appends
+both at the same slot with one capacity check. A visitor can read the kind and fields directly
+from its borrowed row. To get the range, it uses the row's slot in the range column.
 
 The schema declares each node's fields. The generator assigns their physical locations and
 generates constructors, typed accessors, and traversal from the same declarations. A binary

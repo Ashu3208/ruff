@@ -29,6 +29,8 @@ mod nodes;
 mod rewrite;
 mod row;
 mod scalar;
+mod storage;
+use storage::NodeStorage;
 mod string_like;
 pub use string_like::{StringLike, StringLikeKind, StringLikePart, StringLikePartKind};
 pub mod find_node;
@@ -286,7 +288,11 @@ impl<'ast> SyntaxNode<'ast> {
         debug_assert_ne!(slot, 0);
         Self {
             ast,
-            row: ast.rows.get(slot).unwrap_or_else(|| invalid_child()),
+            row: ast
+                .nodes
+                .rows()
+                .get(slot)
+                .unwrap_or_else(|| invalid_child()),
         }
     }
 
@@ -296,12 +302,17 @@ impl<'ast> SyntaxNode<'ast> {
         reason = "Builder::push checks that every row index fits in a u32."
     )]
     fn slot(self) -> u32 {
+        self.slot_usize() as u32
+    }
+
+    #[inline]
+    fn slot_usize(self) -> usize {
         // SAFETY: The row belongs to this AST. Its distance from the beginning of the
         // allocation is the slot used by IDs and by child fields.
         #[expect(unsafe_code)]
-        let slot =
-            unsafe { std::ptr::from_ref(self.row).offset_from_unsigned(self.ast.rows.as_ptr()) };
-        slot as u32
+        unsafe {
+            std::ptr::from_ref(self.row).offset_from_unsigned(self.ast.nodes.rows().as_ptr())
+        }
     }
 
     fn retype<N: AstNode<'ast>>(self) -> N {
@@ -364,7 +375,12 @@ impl crate::HasNodeIndex for SyntaxNode<'_> {
 
 impl Ranged for SyntaxNode<'_> {
     fn range(&self) -> TextRange {
-        self.row.range()
+        // SAFETY: The row belongs to this arena. Its range is inserted, removed and
+        // truncated together with the row. A shared arena borrow fixes both lengths.
+        #[expect(unsafe_code)]
+        unsafe {
+            *self.ast.nodes.ranges().get_unchecked(self.slot_usize())
+        }
     }
 }
 
@@ -538,7 +554,7 @@ impl RowKeys {
 #[derive(Clone, Default, Debug)]
 #[cfg_attr(feature = "get-size", derive(get_size2::GetSize))]
 pub struct Ast {
-    rows: Vec<Row>,
+    nodes: NodeStorage,
     extra: Vec<u32>,
     text: String,
     names: Vec<Name>,
@@ -566,7 +582,7 @@ impl Ast {
     }
 
     pub fn view<T: NodeType>(&self, handle: AstNodeId<T>) -> Option<T::Borrowed<'_>> {
-        let row = self.rows.get(handle.slot())?;
+        let row = self.nodes.rows().get(handle.slot())?;
         if !T::ANY && !T::matches(row.kind()) {
             return None;
         }
@@ -577,13 +593,13 @@ impl Ast {
     pub fn row(&self, index: u32) -> Option<SyntaxNode<'_>> {
         Some(SyntaxNode {
             ast: self,
-            row: self.rows.get((index as usize).checked_add(1)?)?,
+            row: self.nodes.rows().get((index as usize).checked_add(1)?)?,
         })
     }
 
     /// Number of stored nodes, excluding the reserved slot.
     pub fn len(&self) -> usize {
-        self.rows.len().saturating_sub(1)
+        self.nodes.len().saturating_sub(1)
     }
 
     pub fn is_empty(&self) -> bool {
@@ -592,7 +608,8 @@ impl Ast {
 
     /// Searches the stored nodes, including any that parser recovery leaves outside the tree.
     pub fn any_node<'ast>(&'ast self, predicate: impl FnMut(SyntaxNode<'ast>) -> bool) -> bool {
-        self.rows
+        self.nodes
+            .rows()
             .iter()
             .skip(1)
             .map(|row| SyntaxNode { ast: self, row })
@@ -668,13 +685,13 @@ impl Builder {
             estimated.min(128)
         };
         // A small expression such as `x | y` needs three rows in addition to the sentinel.
-        let mut rows = Vec::with_capacity((estimated_rows + 1).max(4));
+        let mut nodes = NodeStorage::with_capacity((estimated_rows + 1).max(4));
         // No view can refer to this row. Its presence makes every child slot a nonzero index.
-        rows.push(Row::new(NodeKind::ModModule, TextRange::default()));
+        assert!(nodes.try_push(Row::new(NodeKind::ModModule), TextRange::default()));
         Self {
             source,
             ast: Ast {
-                rows,
+                nodes,
                 extra: Vec::with_capacity(estimated + estimated / 8),
                 names: Vec::with_capacity(estimated / 8),
                 ..Ast::default()
@@ -691,14 +708,14 @@ impl Builder {
         name: BuildId<crate::kind::ExprName>,
     ) -> BuildId<crate::kind::Identifier> {
         let slot = name.slot();
-        let expr = &self.ast.rows[slot];
-        let mut identifier = Row::new(NodeKind::Identifier, expr.range());
+        let expr = &self.ast.nodes.rows()[slot];
+        let mut identifier = Row::new(NodeKind::Identifier);
         identifier.set_identifier_id(expr.expr_name_id());
-        if slot + 1 == self.ast.rows.len() {
-            self.ast.rows[slot] = identifier;
+        if slot + 1 == self.ast.nodes.len() {
+            self.ast.nodes.rows_mut()[slot] = identifier;
             name.cast()
         } else {
-            self.push(identifier)
+            self.push(identifier, self.ast.nodes.ranges()[slot])
         }
     }
 
@@ -715,9 +732,9 @@ impl Builder {
         pattern: BuildId<crate::kind::Pattern>,
         name: BuildId<crate::kind::Identifier>,
     ) -> build::Identifier {
-        let row = &self.ast.rows[name.slot()];
+        let row = &self.ast.nodes.rows()[name.slot()];
         let identifier = build::Identifier {
-            range: row.range(),
+            range: self.ast.nodes.ranges()[name.slot()],
             id: NameId(row.identifier_id()),
         };
         self.discard_if_last(pattern);
@@ -726,14 +743,14 @@ impl Builder {
     }
 
     fn discard_if_last<T>(&mut self, id: BuildId<T>) {
-        if id.slot() + 1 == self.ast.rows.len() {
-            self.ast.rows.pop();
+        if id.slot() + 1 == self.ast.nodes.len() {
+            self.ast.nodes.truncate(id.slot());
         }
     }
 
     pub fn checkpoint(&self) -> Checkpoint {
         Checkpoint {
-            rows: self.ast.rows.len(),
+            rows: self.ast.nodes.len(),
             extra: self.ast.extra.len(),
             text: self.ast.text.len(),
             names: self.ast.names.len(),
@@ -749,7 +766,7 @@ impl Builder {
         reason = "Rewinding consumes the checkpoint so callers cannot reuse it after rebuilding the tree."
     )]
     pub fn rewind(&mut self, checkpoint: Checkpoint) {
-        self.ast.rows.truncate(checkpoint.rows);
+        self.ast.nodes.truncate(checkpoint.rows);
         self.ast.extra.truncate(checkpoint.extra);
         self.ast.text.truncate(checkpoint.text);
         for (i, name) in self.ast.names.drain(checkpoint.names..).enumerate() {
@@ -767,7 +784,7 @@ impl Builder {
     }
 
     pub fn node_count(&self) -> usize {
-        self.ast.rows.len() - 1
+        self.ast.nodes.len() - 1
     }
 
     pub fn finish_tree<T>(self, root: BuildId<T>) -> Tree<T> {
@@ -860,7 +877,7 @@ impl Builder {
         }
 
         set(
-            &mut self.ast.rows,
+            self.ast.nodes.rows_mut(),
             &self.ast.extra,
             expr.slot,
             context.encode().to_le_bytes()[0],
@@ -868,22 +885,24 @@ impl Builder {
     }
 
     #[inline]
-    fn push<T: NodeType>(&mut self, row: Row) -> BuildId<T> {
-        let index = offset(self.ast.rows.len());
-        if self.ast.rows.len() < self.ast.rows.capacity() {
-            self.ast.rows.push(row);
-        } else {
-            self.grow_and_push(row);
+    fn push<T: NodeType>(&mut self, row: Row, range: TextRange) -> BuildId<T> {
+        let index = offset(self.ast.nodes.len());
+        if !self.ast.nodes.try_push(row, range) {
+            self.grow_and_push(row, range);
         }
         BuildId::new(index)
     }
 
     #[cold]
-    fn grow_and_push(&mut self, row: Row) {
-        if !self.source.is_empty() {
-            self.reserve_rows(row.end());
+    fn grow_and_push(&mut self, row: Row, range: TextRange) {
+        if self.source.is_empty() {
+            self.ast
+                .nodes
+                .reserve_exact(self.ast.nodes.capacity().max(4));
+        } else {
+            self.reserve_rows(range.end());
         }
-        self.ast.rows.push(row);
+        assert!(self.ast.nodes.try_push(row, range));
     }
 
     fn reserve_rows(&mut self, end: TextSize) {
@@ -909,9 +928,9 @@ impl Builder {
             .saturating_add(estimate / 8)
             .saturating_sub(rows)
             .min(rows.saturating_mul(128))
-            .min(MAX_SPECULATIVE_BYTES / size_of::<Row>())
+            .min(MAX_SPECULATIVE_BYTES / (size_of::<Row>() + size_of::<TextRange>()))
             .max(minimum_growth);
-        self.ast.rows.reserve_exact(additional);
+        self.ast.nodes.reserve_exact(additional);
         let extra = self
             .ast
             .extra
@@ -1049,7 +1068,7 @@ impl<T> Tree<T> {
     }
 
     pub fn cast<U: NodeType>(self) -> Option<Tree<U>> {
-        U::matches(self.ast.rows[self.root.slot()].kind()).then(|| Tree {
+        U::matches(self.ast.nodes.rows()[self.root.slot()].kind()).then(|| Tree {
             root: self.root.cast(),
             ast: self.ast,
         })
@@ -1057,7 +1076,7 @@ impl<T> Tree<T> {
 
     /// Releases spare capacity in the row and side-table buffers.
     pub fn shrink_to_fit(&mut self) {
-        self.ast.rows.shrink_to_fit();
+        self.ast.nodes.shrink_to_fit();
         self.ast.extra.shrink_to_fit();
         self.ast.text.shrink_to_fit();
         self.ast.names.shrink_to_fit();
@@ -1067,7 +1086,7 @@ impl<T> Tree<T> {
     }
 
     fn required_node_indices(&self) -> usize {
-        let count = self.ast.rows.len() - 1;
+        let count = self.ast.nodes.len() - 1;
         // The module or expression wrapper has no NodeIndex. Its row can be omitted
         // from the index range when it comes after every indexed row.
         count - usize::from(self.root.index() + 1 == count)
@@ -1123,12 +1142,13 @@ impl Tree<crate::kind::ModExpression> {
     /// Recovered coordinates of expressions inside a decoded string annotation refer to
     /// the containing string. Identifier and literal-part spans still describe the decoded text.
     pub fn relocate_expression(&mut self, range: TextRange) {
-        for row in &mut self.ast.rows {
+        let (rows, ranges) = self.ast.nodes.rows_and_ranges_mut();
+        for (row, span) in rows.iter().zip(ranges) {
             let kind = row.kind();
             if crate::kind::Expr::matches(kind)
                 || matches!(kind, NodeKind::Arguments | NodeKind::Keyword)
             {
-                row.set_range(range);
+                *span = range;
             }
         }
     }
@@ -1164,15 +1184,23 @@ mod tests {
     fn dense_prefix_bounds_speculative_reservations() {
         let source = TextRange::up_to(TextSize::new(8 << 20));
         let mut builder = Builder::for_source(source);
-        builder.ast.rows.resize_with(16_385, || {
-            Row::new(NodeKind::StmtPass, TextRange::default())
-        });
+        builder.ast.nodes.reserve_exact(16_384);
+        for _ in 0..16_384 {
+            assert!(
+                builder
+                    .ast
+                    .nodes
+                    .try_push(Row::new(NodeKind::StmtPass), TextRange::default())
+            );
+        }
         builder.ast.extra.resize(128 << 10, 0);
 
         builder.reserve_rows(TextSize::new(32 << 10));
-        let rows = &builder.ast.rows;
+        let nodes = &builder.ast.nodes;
         let extra = &builder.ast.extra;
-        assert!((rows.capacity() - rows.len()) * size_of::<Row>() <= 1 << 20);
+        let spare_bytes =
+            (nodes.capacity() - nodes.len()) * (size_of::<Row>() + size_of::<TextRange>());
+        assert!(spare_bytes <= 1 << 20);
         assert!((extra.capacity() - extra.len()) * size_of::<u32>() <= 1 << 20);
     }
 }

@@ -565,9 +565,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [body]: [u64; 1],
     ) -> BuildId<crate::kind::ModModule> {
-        let mut row = Row::new(NodeKind::ModModule, range);
+        let mut row = Row::new(NodeKind::ModModule);
         row.set_mod_module_body(body);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ModModule<'a> {
@@ -603,9 +603,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [body]: [u64; 1],
     ) -> BuildId<crate::kind::ModExpression> {
-        let mut row = Row::new(NodeKind::ModExpression, range);
+        let mut row = Row::new(NodeKind::ModExpression);
         row.set_mod_expression_body(split_words(body)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ModExpression<'a> {
@@ -655,7 +655,7 @@ impl Builder {
             body,
         ]: [u64; 7],
     ) -> BuildId<crate::kind::StmtFunctionDef> {
-        let mut row = Row::new(NodeKind::StmtFunctionDef, range);
+        let mut row = Row::new(NodeKind::StmtFunctionDef);
         row.set_stmt_function_def_is_async(is_async.to_le_bytes()[0]);
         row.set_stmt_function_def_name(split_words(name)[0]);
         row.set_stmt_function_def_type_params(split_words(type_params)[0]);
@@ -668,7 +668,7 @@ impl Builder {
             split_words(body)[0],
             split_words(body)[1],
         ]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtFunctionDef<'a> {
@@ -750,7 +750,7 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [decorator_list, name, type_params, arguments, body]: [u64; 5],
     ) -> BuildId<crate::kind::StmtClassDef> {
-        let mut row = Row::new(NodeKind::StmtClassDef, range);
+        let mut row = Row::new(NodeKind::StmtClassDef);
         row.set_stmt_class_def_name(split_words(name)[0]);
         row.set_stmt_class_def_type_params(split_words(type_params)[0]);
         row.set_stmt_class_def_extra_offset(offset(self.ast.extra.len()));
@@ -761,7 +761,7 @@ impl Builder {
             split_words(body)[0],
             split_words(body)[1],
         ]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtClassDef<'a> {
@@ -826,9 +826,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value]: [u64; 1],
     ) -> BuildId<crate::kind::StmtReturn> {
-        let mut row = Row::new(NodeKind::StmtReturn, range);
+        let mut row = Row::new(NodeKind::StmtReturn);
         row.set_stmt_return_value(split_words(value)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtReturn<'a> {
@@ -864,9 +864,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [targets]: [u64; 1],
     ) -> BuildId<crate::kind::StmtDelete> {
-        let mut row = Row::new(NodeKind::StmtDelete, range);
+        let mut row = Row::new(NodeKind::StmtDelete);
         row.set_stmt_delete_targets(targets);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtDelete<'a> {
@@ -904,11 +904,11 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [name, type_params, value]: [u64; 3],
     ) -> BuildId<crate::kind::StmtTypeAlias> {
-        let mut row = Row::new(NodeKind::StmtTypeAlias, range);
+        let mut row = Row::new(NodeKind::StmtTypeAlias);
         row.set_stmt_type_alias_name(split_words(name)[0]);
         row.set_stmt_type_alias_type_params(split_words(type_params)[0]);
         row.set_stmt_type_alias_value(split_words(value)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtTypeAlias<'a> {
@@ -955,10 +955,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [targets, value]: [u64; 2],
     ) -> BuildId<crate::kind::StmtAssign> {
-        let mut row = Row::new(NodeKind::StmtAssign, range);
+        let mut row = Row::new(NodeKind::StmtAssign);
         row.set_stmt_assign_targets(targets);
         row.set_stmt_assign_value(split_words(value)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtAssign<'a> {
@@ -1001,11 +1001,11 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [target, op, value]: [u64; 3],
     ) -> BuildId<crate::kind::StmtAugAssign> {
-        let mut row = Row::new(NodeKind::StmtAugAssign, range);
+        let mut row = Row::new(NodeKind::StmtAugAssign);
         row.set_stmt_aug_assign_target(split_words(target)[0]);
         row.set_stmt_aug_assign_op(op.to_le_bytes()[0]);
         row.set_stmt_aug_assign_value(split_words(value)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtAugAssign<'a> {
@@ -1054,12 +1054,12 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [target, annotation, value, simple]: [u64; 4],
     ) -> BuildId<crate::kind::StmtAnnAssign> {
-        let mut row = Row::new(NodeKind::StmtAnnAssign, range);
+        let mut row = Row::new(NodeKind::StmtAnnAssign);
         row.set_stmt_ann_assign_target(split_words(target)[0]);
         row.set_stmt_ann_assign_annotation(split_words(annotation)[0]);
         row.set_stmt_ann_assign_value(split_words(value)[0]);
         row.set_stmt_ann_assign_simple(simple.to_le_bytes()[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtAnnAssign<'a> {
@@ -1114,7 +1114,7 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [is_async, target, iter, body, orelse]: [u64; 5],
     ) -> BuildId<crate::kind::StmtFor> {
-        let mut row = Row::new(NodeKind::StmtFor, range);
+        let mut row = Row::new(NodeKind::StmtFor);
         row.set_stmt_for_is_async(is_async.to_le_bytes()[0]);
         row.set_stmt_for_target(split_words(target)[0]);
         row.set_stmt_for_iter(split_words(iter)[0]);
@@ -1125,7 +1125,7 @@ impl Builder {
             split_words(orelse)[0],
             split_words(orelse)[1],
         ]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtFor<'a> {
@@ -1193,7 +1193,7 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [test, body, orelse]: [u64; 3],
     ) -> BuildId<crate::kind::StmtWhile> {
-        let mut row = Row::new(NodeKind::StmtWhile, range);
+        let mut row = Row::new(NodeKind::StmtWhile);
         row.set_stmt_while_test(split_words(test)[0]);
         row.set_stmt_while_extra_offset(offset(self.ast.extra.len()));
         self.ast.extra.extend([
@@ -1202,7 +1202,7 @@ impl Builder {
             split_words(orelse)[0],
             split_words(orelse)[1],
         ]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtWhile<'a> {
@@ -1256,7 +1256,7 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [test, body, elif_else_clauses]: [u64; 3],
     ) -> BuildId<crate::kind::StmtIf> {
-        let mut row = Row::new(NodeKind::StmtIf, range);
+        let mut row = Row::new(NodeKind::StmtIf);
         row.set_stmt_if_test(split_words(test)[0]);
         row.set_stmt_if_extra_offset(offset(self.ast.extra.len()));
         self.ast.extra.extend([
@@ -1265,7 +1265,7 @@ impl Builder {
             split_words(elif_else_clauses)[0],
             split_words(elif_else_clauses)[1],
         ]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtIf<'a> {
@@ -1319,14 +1319,14 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [is_async, items, body]: [u64; 3],
     ) -> BuildId<crate::kind::StmtWith> {
-        let mut row = Row::new(NodeKind::StmtWith, range);
+        let mut row = Row::new(NodeKind::StmtWith);
         row.set_stmt_with_is_async(is_async.to_le_bytes()[0]);
         row.set_stmt_with_items(items);
         row.set_stmt_with_extra_offset(offset(self.ast.extra.len()));
         self.ast
             .extra
             .extend([split_words(body)[0], split_words(body)[1]]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtWith<'a> {
@@ -1376,10 +1376,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [subject, cases]: [u64; 2],
     ) -> BuildId<crate::kind::StmtMatch> {
-        let mut row = Row::new(NodeKind::StmtMatch, range);
+        let mut row = Row::new(NodeKind::StmtMatch);
         row.set_stmt_match_subject(split_words(subject)[0]);
         row.set_stmt_match_cases(cases);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtMatch<'a> {
@@ -1421,10 +1421,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [exc, cause]: [u64; 2],
     ) -> BuildId<crate::kind::StmtRaise> {
-        let mut row = Row::new(NodeKind::StmtRaise, range);
+        let mut row = Row::new(NodeKind::StmtRaise);
         row.set_stmt_raise_exc(split_words(exc)[0]);
         row.set_stmt_raise_cause(split_words(cause)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtRaise<'a> {
@@ -1469,7 +1469,7 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [body, handlers, orelse, finalbody, is_star]: [u64; 5],
     ) -> BuildId<crate::kind::StmtTry> {
-        let mut row = Row::new(NodeKind::StmtTry, range);
+        let mut row = Row::new(NodeKind::StmtTry);
         row.set_stmt_try_body(body);
         row.set_stmt_try_is_star(is_star.to_le_bytes()[0]);
         row.set_stmt_try_extra_offset(offset(self.ast.extra.len()));
@@ -1481,7 +1481,7 @@ impl Builder {
             split_words(finalbody)[0],
             split_words(finalbody)[1],
         ]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtTry<'a> {
@@ -1547,10 +1547,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [test, msg]: [u64; 2],
     ) -> BuildId<crate::kind::StmtAssert> {
-        let mut row = Row::new(NodeKind::StmtAssert, range);
+        let mut row = Row::new(NodeKind::StmtAssert);
         row.set_stmt_assert_test(split_words(test)[0]);
         row.set_stmt_assert_msg(split_words(msg)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtAssert<'a> {
@@ -1592,10 +1592,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [names, is_lazy]: [u64; 2],
     ) -> BuildId<crate::kind::StmtImport> {
-        let mut row = Row::new(NodeKind::StmtImport, range);
+        let mut row = Row::new(NodeKind::StmtImport);
         row.set_stmt_import_names(names);
         row.set_stmt_import_is_lazy(is_lazy.to_le_bytes()[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtImport<'a> {
@@ -1639,7 +1639,7 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [module, names, level, is_lazy]: [u64; 4],
     ) -> BuildId<crate::kind::StmtImportFrom> {
-        let mut row = Row::new(NodeKind::StmtImportFrom, range);
+        let mut row = Row::new(NodeKind::StmtImportFrom);
         row.set_stmt_import_from_module(split_words(module)[0]);
         row.set_stmt_import_from_level(split_words(level)[0]);
         row.set_stmt_import_from_is_lazy(is_lazy.to_le_bytes()[0]);
@@ -1647,7 +1647,7 @@ impl Builder {
         self.ast
             .extra
             .extend([split_words(names)[0], split_words(names)[1]]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtImportFrom<'a> {
@@ -1701,9 +1701,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [names]: [u64; 1],
     ) -> BuildId<crate::kind::StmtGlobal> {
-        let mut row = Row::new(NodeKind::StmtGlobal, range);
+        let mut row = Row::new(NodeKind::StmtGlobal);
         row.set_stmt_global_names(names);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtGlobal<'a> {
@@ -1739,9 +1739,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [names]: [u64; 1],
     ) -> BuildId<crate::kind::StmtNonlocal> {
-        let mut row = Row::new(NodeKind::StmtNonlocal, range);
+        let mut row = Row::new(NodeKind::StmtNonlocal);
         row.set_stmt_nonlocal_names(names);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtNonlocal<'a> {
@@ -1777,9 +1777,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value]: [u64; 1],
     ) -> BuildId<crate::kind::StmtExpr> {
-        let mut row = Row::new(NodeKind::StmtExpr, range);
+        let mut row = Row::new(NodeKind::StmtExpr);
         row.set_stmt_expr_value(split_words(value)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtExpr<'a> {
@@ -1814,8 +1814,8 @@ impl Builder {
         range: ruff_text_size::TextRange,
         []: [u64; 0],
     ) -> BuildId<crate::kind::StmtPass> {
-        let row = Row::new(NodeKind::StmtPass, range);
-        self.push(row)
+        let row = Row::new(NodeKind::StmtPass);
+        self.push(row, range)
     }
 }
 impl NodeType for crate::kind::StmtBreak {
@@ -1843,8 +1843,8 @@ impl Builder {
         range: ruff_text_size::TextRange,
         []: [u64; 0],
     ) -> BuildId<crate::kind::StmtBreak> {
-        let row = Row::new(NodeKind::StmtBreak, range);
-        self.push(row)
+        let row = Row::new(NodeKind::StmtBreak);
+        self.push(row, range)
     }
 }
 impl NodeType for crate::kind::StmtContinue {
@@ -1872,8 +1872,8 @@ impl Builder {
         range: ruff_text_size::TextRange,
         []: [u64; 0],
     ) -> BuildId<crate::kind::StmtContinue> {
-        let row = Row::new(NodeKind::StmtContinue, range);
-        self.push(row)
+        let row = Row::new(NodeKind::StmtContinue);
+        self.push(row, range)
     }
 }
 impl NodeType for crate::kind::StmtIpyEscapeCommand {
@@ -1903,10 +1903,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [kind, value]: [u64; 2],
     ) -> BuildId<crate::kind::StmtIpyEscapeCommand> {
-        let mut row = Row::new(NodeKind::StmtIpyEscapeCommand, range);
+        let mut row = Row::new(NodeKind::StmtIpyEscapeCommand);
         row.set_stmt_ipy_escape_command_kind(kind.to_le_bytes()[0]);
         row.set_stmt_ipy_escape_command_value(value);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StmtIpyEscapeCommand<'a> {
@@ -1948,10 +1948,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [op, values]: [u64; 2],
     ) -> BuildId<crate::kind::ExprBoolOp> {
-        let mut row = Row::new(NodeKind::ExprBoolOp, range);
+        let mut row = Row::new(NodeKind::ExprBoolOp);
         row.set_expr_bool_op_op(op.to_le_bytes()[0]);
         row.set_expr_bool_op_values(values);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprBoolOp<'a> {
@@ -1993,10 +1993,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [target, value]: [u64; 2],
     ) -> BuildId<crate::kind::ExprNamed> {
-        let mut row = Row::new(NodeKind::ExprNamed, range);
+        let mut row = Row::new(NodeKind::ExprNamed);
         row.set_expr_named_target(split_words(target)[0]);
         row.set_expr_named_value(split_words(value)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprNamed<'a> {
@@ -2039,11 +2039,11 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [left, op, right]: [u64; 3],
     ) -> BuildId<crate::kind::ExprBinOp> {
-        let mut row = Row::new(NodeKind::ExprBinOp, range);
+        let mut row = Row::new(NodeKind::ExprBinOp);
         row.set_expr_bin_op_left(split_words(left)[0]);
         row.set_expr_bin_op_op(op.to_le_bytes()[0]);
         row.set_expr_bin_op_right(split_words(right)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprBinOp<'a> {
@@ -2090,10 +2090,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [op, operand]: [u64; 2],
     ) -> BuildId<crate::kind::ExprUnaryOp> {
-        let mut row = Row::new(NodeKind::ExprUnaryOp, range);
+        let mut row = Row::new(NodeKind::ExprUnaryOp);
         row.set_expr_unary_op_op(op.to_le_bytes()[0]);
         row.set_expr_unary_op_operand(split_words(operand)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprUnaryOp<'a> {
@@ -2135,10 +2135,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [parameters, body]: [u64; 2],
     ) -> BuildId<crate::kind::ExprLambda> {
-        let mut row = Row::new(NodeKind::ExprLambda, range);
+        let mut row = Row::new(NodeKind::ExprLambda);
         row.set_expr_lambda_parameters(split_words(parameters)[0]);
         row.set_expr_lambda_body(split_words(body)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprLambda<'a> {
@@ -2181,11 +2181,11 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [test, body, orelse]: [u64; 3],
     ) -> BuildId<crate::kind::ExprIf> {
-        let mut row = Row::new(NodeKind::ExprIf, range);
+        let mut row = Row::new(NodeKind::ExprIf);
         row.set_expr_if_test(split_words(test)[0]);
         row.set_expr_if_body(split_words(body)[0]);
         row.set_expr_if_orelse(split_words(orelse)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprIf<'a> {
@@ -2231,9 +2231,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [items]: [u64; 1],
     ) -> BuildId<crate::kind::ExprDict> {
-        let mut row = Row::new(NodeKind::ExprDict, range);
+        let mut row = Row::new(NodeKind::ExprDict);
         row.set_expr_dict_items(items);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprDict<'a> {
@@ -2269,9 +2269,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [elts]: [u64; 1],
     ) -> BuildId<crate::kind::ExprSet> {
-        let mut row = Row::new(NodeKind::ExprSet, range);
+        let mut row = Row::new(NodeKind::ExprSet);
         row.set_expr_set_elts(elts);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprSet<'a> {
@@ -2308,10 +2308,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [elt, generators]: [u64; 2],
     ) -> BuildId<crate::kind::ExprListComp> {
-        let mut row = Row::new(NodeKind::ExprListComp, range);
+        let mut row = Row::new(NodeKind::ExprListComp);
         row.set_expr_list_comp_elt(split_words(elt)[0]);
         row.set_expr_list_comp_generators(generators);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprListComp<'a> {
@@ -2353,10 +2353,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [elt, generators]: [u64; 2],
     ) -> BuildId<crate::kind::ExprSetComp> {
-        let mut row = Row::new(NodeKind::ExprSetComp, range);
+        let mut row = Row::new(NodeKind::ExprSetComp);
         row.set_expr_set_comp_elt(split_words(elt)[0]);
         row.set_expr_set_comp_generators(generators);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprSetComp<'a> {
@@ -2399,14 +2399,14 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [key, value, generators]: [u64; 3],
     ) -> BuildId<crate::kind::ExprDictComp> {
-        let mut row = Row::new(NodeKind::ExprDictComp, range);
+        let mut row = Row::new(NodeKind::ExprDictComp);
         row.set_expr_dict_comp_key(split_words(key)[0]);
         row.set_expr_dict_comp_value(split_words(value)[0]);
         row.set_expr_dict_comp_extra_offset(offset(self.ast.extra.len()));
         self.ast
             .extra
             .extend([split_words(generators)[0], split_words(generators)[1]]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprDictComp<'a> {
@@ -2457,11 +2457,11 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [elt, generators, parenthesized]: [u64; 3],
     ) -> BuildId<crate::kind::ExprGenerator> {
-        let mut row = Row::new(NodeKind::ExprGenerator, range);
+        let mut row = Row::new(NodeKind::ExprGenerator);
         row.set_expr_generator_elt(split_words(elt)[0]);
         row.set_expr_generator_generators(generators);
         row.set_expr_generator_parenthesized(parenthesized.to_le_bytes()[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprGenerator<'a> {
@@ -2507,9 +2507,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value]: [u64; 1],
     ) -> BuildId<crate::kind::ExprAwait> {
-        let mut row = Row::new(NodeKind::ExprAwait, range);
+        let mut row = Row::new(NodeKind::ExprAwait);
         row.set_expr_await_value(split_words(value)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprAwait<'a> {
@@ -2545,9 +2545,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value]: [u64; 1],
     ) -> BuildId<crate::kind::ExprYield> {
-        let mut row = Row::new(NodeKind::ExprYield, range);
+        let mut row = Row::new(NodeKind::ExprYield);
         row.set_expr_yield_value(split_words(value)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprYield<'a> {
@@ -2583,9 +2583,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value]: [u64; 1],
     ) -> BuildId<crate::kind::ExprYieldFrom> {
-        let mut row = Row::new(NodeKind::ExprYieldFrom, range);
+        let mut row = Row::new(NodeKind::ExprYieldFrom);
         row.set_expr_yield_from_value(split_words(value)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprYieldFrom<'a> {
@@ -2622,12 +2622,12 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [ops, operands]: [u64; 2],
     ) -> BuildId<crate::kind::ExprCompare> {
-        let mut row = Row::new(NodeKind::ExprCompare, range);
+        let mut row = Row::new(NodeKind::ExprCompare);
         let [ops, operands] =
             super::list::Interval::pack_pair(&mut self.ast.extra, [ops, operands]);
         row.set_expr_compare_ops(split_words(ops)[0]);
         row.set_expr_compare_operands(operands);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprCompare<'a> {
@@ -2680,10 +2680,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [func, arguments]: [u64; 2],
     ) -> BuildId<crate::kind::ExprCall> {
-        let mut row = Row::new(NodeKind::ExprCall, range);
+        let mut row = Row::new(NodeKind::ExprCall);
         row.set_expr_call_func(split_words(func)[0]);
         row.set_expr_call_arguments(split_words(arguments)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprCall<'a> {
@@ -2724,9 +2724,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value]: [u64; 1],
     ) -> BuildId<crate::kind::ExprFString> {
-        let mut row = Row::new(NodeKind::ExprFString, range);
+        let mut row = Row::new(NodeKind::ExprFString);
         row.set_expr_f_string_value(value);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprFString<'a> {
@@ -2762,9 +2762,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value]: [u64; 1],
     ) -> BuildId<crate::kind::ExprTString> {
-        let mut row = Row::new(NodeKind::ExprTString, range);
+        let mut row = Row::new(NodeKind::ExprTString);
         row.set_expr_t_string_value(value);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprTString<'a> {
@@ -2800,12 +2800,12 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value]: [u64; 1],
     ) -> BuildId<crate::kind::ExprStringLiteral> {
-        let mut row = Row::new(NodeKind::ExprStringLiteral, range);
+        let mut row = Row::new(NodeKind::ExprStringLiteral);
         row.set_expr_string_literal_value(value);
         let (start, len) = self.string_literal_text(value);
         row.set_expr_string_literal_text_offset(start);
         row.set_expr_string_literal_text_len(len);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprStringLiteral<'a> {
@@ -2845,9 +2845,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value]: [u64; 1],
     ) -> BuildId<crate::kind::ExprBytesLiteral> {
-        let mut row = Row::new(NodeKind::ExprBytesLiteral, range);
+        let mut row = Row::new(NodeKind::ExprBytesLiteral);
         row.set_expr_bytes_literal_value(value);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprBytesLiteral<'a> {
@@ -2883,9 +2883,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value]: [u64; 1],
     ) -> BuildId<crate::kind::ExprNumberLiteral> {
-        let mut row = Row::new(NodeKind::ExprNumberLiteral, range);
+        let mut row = Row::new(NodeKind::ExprNumberLiteral);
         row.set_expr_number_literal_value(split_words(value)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprNumberLiteral<'a> {
@@ -2921,9 +2921,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value]: [u64; 1],
     ) -> BuildId<crate::kind::ExprBooleanLiteral> {
-        let mut row = Row::new(NodeKind::ExprBooleanLiteral, range);
+        let mut row = Row::new(NodeKind::ExprBooleanLiteral);
         row.set_expr_boolean_literal_value(value.to_le_bytes()[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl crate::ExprBooleanLiteral<'_> {
@@ -2958,8 +2958,8 @@ impl Builder {
         range: ruff_text_size::TextRange,
         []: [u64; 0],
     ) -> BuildId<crate::kind::ExprNoneLiteral> {
-        let row = Row::new(NodeKind::ExprNoneLiteral, range);
-        self.push(row)
+        let row = Row::new(NodeKind::ExprNoneLiteral);
+        self.push(row, range)
     }
 }
 impl NodeType for crate::kind::ExprEllipsisLiteral {
@@ -2987,8 +2987,8 @@ impl Builder {
         range: ruff_text_size::TextRange,
         []: [u64; 0],
     ) -> BuildId<crate::kind::ExprEllipsisLiteral> {
-        let row = Row::new(NodeKind::ExprEllipsisLiteral, range);
-        self.push(row)
+        let row = Row::new(NodeKind::ExprEllipsisLiteral);
+        self.push(row, range)
     }
 }
 impl NodeType for crate::kind::ExprAttribute {
@@ -3019,11 +3019,11 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value, attr, ctx]: [u64; 3],
     ) -> BuildId<crate::kind::ExprAttribute> {
-        let mut row = Row::new(NodeKind::ExprAttribute, range);
+        let mut row = Row::new(NodeKind::ExprAttribute);
         row.set_expr_attribute_value(split_words(value)[0]);
         row.set_expr_attribute_attr(split_words(attr)[0]);
         row.set_expr_attribute_ctx(ctx.to_le_bytes()[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprAttribute<'a> {
@@ -3071,11 +3071,11 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value, slice, ctx]: [u64; 3],
     ) -> BuildId<crate::kind::ExprSubscript> {
-        let mut row = Row::new(NodeKind::ExprSubscript, range);
+        let mut row = Row::new(NodeKind::ExprSubscript);
         row.set_expr_subscript_value(split_words(value)[0]);
         row.set_expr_subscript_slice(split_words(slice)[0]);
         row.set_expr_subscript_ctx(ctx.to_le_bytes()[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprSubscript<'a> {
@@ -3122,10 +3122,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value, ctx]: [u64; 2],
     ) -> BuildId<crate::kind::ExprStarred> {
-        let mut row = Row::new(NodeKind::ExprStarred, range);
+        let mut row = Row::new(NodeKind::ExprStarred);
         row.set_expr_starred_value(split_words(value)[0]);
         row.set_expr_starred_ctx(ctx.to_le_bytes()[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprStarred<'a> {
@@ -3167,10 +3167,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [id, ctx]: [u64; 2],
     ) -> BuildId<crate::kind::ExprName> {
-        let mut row = Row::new(NodeKind::ExprName, range);
+        let mut row = Row::new(NodeKind::ExprName);
         row.set_expr_name_id(split_words(id)[0]);
         row.set_expr_name_ctx(ctx.to_le_bytes()[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprName<'a> {
@@ -3216,10 +3216,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [elts, ctx]: [u64; 2],
     ) -> BuildId<crate::kind::ExprList> {
-        let mut row = Row::new(NodeKind::ExprList, range);
+        let mut row = Row::new(NodeKind::ExprList);
         row.set_expr_list_elts(elts);
         row.set_expr_list_ctx(ctx.to_le_bytes()[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprList<'a> {
@@ -3262,11 +3262,11 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [elts, ctx, parenthesized]: [u64; 3],
     ) -> BuildId<crate::kind::ExprTuple> {
-        let mut row = Row::new(NodeKind::ExprTuple, range);
+        let mut row = Row::new(NodeKind::ExprTuple);
         row.set_expr_tuple_elts(elts);
         row.set_expr_tuple_ctx(ctx.to_le_bytes()[0]);
         row.set_expr_tuple_parenthesized(parenthesized.to_le_bytes()[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprTuple<'a> {
@@ -3314,11 +3314,11 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [lower, upper, step]: [u64; 3],
     ) -> BuildId<crate::kind::ExprSlice> {
-        let mut row = Row::new(NodeKind::ExprSlice, range);
+        let mut row = Row::new(NodeKind::ExprSlice);
         row.set_expr_slice_lower(split_words(lower)[0]);
         row.set_expr_slice_upper(split_words(upper)[0]);
         row.set_expr_slice_step(split_words(step)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprSlice<'a> {
@@ -3365,10 +3365,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [kind, value]: [u64; 2],
     ) -> BuildId<crate::kind::ExprIpyEscapeCommand> {
-        let mut row = Row::new(NodeKind::ExprIpyEscapeCommand, range);
+        let mut row = Row::new(NodeKind::ExprIpyEscapeCommand);
         row.set_expr_ipy_escape_command_kind(kind.to_le_bytes()[0]);
         row.set_expr_ipy_escape_command_value(value);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExprIpyEscapeCommand<'a> {
@@ -3411,14 +3411,14 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [type_, name, body]: [u64; 3],
     ) -> BuildId<crate::kind::ExceptHandlerExceptHandler> {
-        let mut row = Row::new(NodeKind::ExceptHandlerExceptHandler, range);
+        let mut row = Row::new(NodeKind::ExceptHandlerExceptHandler);
         row.set_except_handler_except_handler_type_(split_words(type_)[0]);
         row.set_except_handler_except_handler_name(split_words(name)[0]);
         row.set_except_handler_except_handler_extra_offset(offset(self.ast.extra.len()));
         self.ast
             .extra
             .extend([split_words(body)[0], split_words(body)[1]]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ExceptHandlerExceptHandler<'a> {
@@ -3470,12 +3470,12 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [expression, debug_text, conversion, format_spec]: [u64; 4],
     ) -> BuildId<crate::kind::InterpolatedElement> {
-        let mut row = Row::new(NodeKind::InterpolatedElement, range);
+        let mut row = Row::new(NodeKind::InterpolatedElement);
         row.set_interpolated_element_expression(split_words(expression)[0]);
         row.set_interpolated_element_debug_text(split_words(debug_text)[0]);
         row.set_interpolated_element_conversion(conversion.to_le_bytes()[0]);
         row.set_interpolated_element_format_spec(split_words(format_spec)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::InterpolatedElement<'a> {
@@ -3527,9 +3527,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value]: [u64; 1],
     ) -> BuildId<crate::kind::InterpolatedStringLiteralElement> {
-        let mut row = Row::new(NodeKind::InterpolatedStringLiteralElement, range);
+        let mut row = Row::new(NodeKind::InterpolatedStringLiteralElement);
         row.set_interpolated_string_literal_element_value(value);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::InterpolatedStringLiteralElement<'a> {
@@ -3565,9 +3565,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value]: [u64; 1],
     ) -> BuildId<crate::kind::PatternMatchValue> {
-        let mut row = Row::new(NodeKind::PatternMatchValue, range);
+        let mut row = Row::new(NodeKind::PatternMatchValue);
         row.set_pattern_match_value_value(split_words(value)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::PatternMatchValue<'a> {
@@ -3603,9 +3603,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value]: [u64; 1],
     ) -> BuildId<crate::kind::PatternMatchSingleton> {
-        let mut row = Row::new(NodeKind::PatternMatchSingleton, range);
+        let mut row = Row::new(NodeKind::PatternMatchSingleton);
         row.set_pattern_match_singleton_value(value.to_le_bytes()[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl crate::PatternMatchSingleton<'_> {
@@ -3641,9 +3641,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [patterns]: [u64; 1],
     ) -> BuildId<crate::kind::PatternMatchSequence> {
-        let mut row = Row::new(NodeKind::PatternMatchSequence, range);
+        let mut row = Row::new(NodeKind::PatternMatchSequence);
         row.set_pattern_match_sequence_patterns(patterns);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::PatternMatchSequence<'a> {
@@ -3679,9 +3679,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [items]: [u64; 1],
     ) -> BuildId<crate::kind::PatternMatchMapping> {
-        let mut row = Row::new(NodeKind::PatternMatchMapping, range);
+        let mut row = Row::new(NodeKind::PatternMatchMapping);
         row.set_pattern_match_mapping_items(items);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::PatternMatchMapping<'a> {
@@ -3718,10 +3718,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [cls, arguments]: [u64; 2],
     ) -> BuildId<crate::kind::PatternMatchClass> {
-        let mut row = Row::new(NodeKind::PatternMatchClass, range);
+        let mut row = Row::new(NodeKind::PatternMatchClass);
         row.set_pattern_match_class_cls(split_words(cls)[0]);
         row.set_pattern_match_class_arguments(split_words(arguments)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::PatternMatchClass<'a> {
@@ -3762,9 +3762,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [name]: [u64; 1],
     ) -> BuildId<crate::kind::PatternMatchStar> {
-        let mut row = Row::new(NodeKind::PatternMatchStar, range);
+        let mut row = Row::new(NodeKind::PatternMatchStar);
         row.set_pattern_match_star_name(split_words(name)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::PatternMatchStar<'a> {
@@ -3801,10 +3801,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [pattern, name]: [u64; 2],
     ) -> BuildId<crate::kind::PatternMatchAs> {
-        let mut row = Row::new(NodeKind::PatternMatchAs, range);
+        let mut row = Row::new(NodeKind::PatternMatchAs);
         row.set_pattern_match_as_pattern(split_words(pattern)[0]);
         row.set_pattern_match_as_name(split_words(name)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::PatternMatchAs<'a> {
@@ -3845,9 +3845,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [patterns]: [u64; 1],
     ) -> BuildId<crate::kind::PatternMatchOr> {
-        let mut row = Row::new(NodeKind::PatternMatchOr, range);
+        let mut row = Row::new(NodeKind::PatternMatchOr);
         row.set_pattern_match_or_patterns(patterns);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::PatternMatchOr<'a> {
@@ -3885,11 +3885,11 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [name, bound, default]: [u64; 3],
     ) -> BuildId<crate::kind::TypeParamTypeVar> {
-        let mut row = Row::new(NodeKind::TypeParamTypeVar, range);
+        let mut row = Row::new(NodeKind::TypeParamTypeVar);
         row.set_type_param_type_var_name(split_words(name)[0]);
         row.set_type_param_type_var_bound(split_words(bound)[0]);
         row.set_type_param_type_var_default(split_words(default)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::TypeParamTypeVar<'a> {
@@ -3936,10 +3936,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [name, default]: [u64; 2],
     ) -> BuildId<crate::kind::TypeParamTypeVarTuple> {
-        let mut row = Row::new(NodeKind::TypeParamTypeVarTuple, range);
+        let mut row = Row::new(NodeKind::TypeParamTypeVarTuple);
         row.set_type_param_type_var_tuple_name(split_words(name)[0]);
         row.set_type_param_type_var_tuple_default(split_words(default)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::TypeParamTypeVarTuple<'a> {
@@ -3981,10 +3981,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [name, default]: [u64; 2],
     ) -> BuildId<crate::kind::TypeParamParamSpec> {
-        let mut row = Row::new(NodeKind::TypeParamParamSpec, range);
+        let mut row = Row::new(NodeKind::TypeParamParamSpec);
         row.set_type_param_param_spec_name(split_words(name)[0]);
         row.set_type_param_param_spec_default(split_words(default)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::TypeParamParamSpec<'a> {
@@ -4025,9 +4025,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [elements]: [u64; 1],
     ) -> BuildId<crate::kind::InterpolatedStringFormatSpec> {
-        let mut row = Row::new(NodeKind::InterpolatedStringFormatSpec, range);
+        let mut row = Row::new(NodeKind::InterpolatedStringFormatSpec);
         row.set_interpolated_string_format_spec_elements(elements);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::InterpolatedStringFormatSpec<'a> {
@@ -4063,9 +4063,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [items]: [u64; 1],
     ) -> BuildId<crate::kind::PatternArguments> {
-        let mut row = Row::new(NodeKind::PatternArguments, range);
+        let mut row = Row::new(NodeKind::PatternArguments);
         row.set_pattern_arguments_items(items);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::PatternArguments<'a> {
@@ -4102,10 +4102,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [attr, pattern]: [u64; 2],
     ) -> BuildId<crate::kind::PatternKeyword> {
-        let mut row = Row::new(NodeKind::PatternKeyword, range);
+        let mut row = Row::new(NodeKind::PatternKeyword);
         row.set_pattern_keyword_attr(split_words(attr)[0]);
         row.set_pattern_keyword_pattern(split_words(pattern)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::PatternKeyword<'a> {
@@ -4149,7 +4149,7 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [target, iter, ifs, is_async]: [u64; 4],
     ) -> BuildId<crate::kind::Comprehension> {
-        let mut row = Row::new(NodeKind::Comprehension, range);
+        let mut row = Row::new(NodeKind::Comprehension);
         row.set_comprehension_target(split_words(target)[0]);
         row.set_comprehension_iter(split_words(iter)[0]);
         row.set_comprehension_is_async(is_async.to_le_bytes()[0]);
@@ -4157,7 +4157,7 @@ impl Builder {
         self.ast
             .extra
             .extend([split_words(ifs)[0], split_words(ifs)[1]]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::Comprehension<'a> {
@@ -4215,9 +4215,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [items]: [u64; 1],
     ) -> BuildId<crate::kind::Arguments> {
-        let mut row = Row::new(NodeKind::Arguments, range);
+        let mut row = Row::new(NodeKind::Arguments);
         row.set_arguments_items(items);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::Arguments<'a> {
@@ -4253,9 +4253,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [items]: [u64; 1],
     ) -> BuildId<crate::kind::Parameters> {
-        let mut row = Row::new(NodeKind::Parameters, range);
+        let mut row = Row::new(NodeKind::Parameters);
         row.set_parameters_items(items);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::Parameters<'a> {
@@ -4292,10 +4292,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [name, annotation]: [u64; 2],
     ) -> BuildId<crate::kind::Parameter> {
-        let mut row = Row::new(NodeKind::Parameter, range);
+        let mut row = Row::new(NodeKind::Parameter);
         row.set_parameter_name(split_words(name)[0]);
         row.set_parameter_annotation(split_words(annotation)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::Parameter<'a> {
@@ -4337,10 +4337,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [parameter, default]: [u64; 2],
     ) -> BuildId<crate::kind::ParameterWithDefault> {
-        let mut row = Row::new(NodeKind::ParameterWithDefault, range);
+        let mut row = Row::new(NodeKind::ParameterWithDefault);
         row.set_parameter_with_default_parameter(split_words(parameter)[0]);
         row.set_parameter_with_default_default(split_words(default)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ParameterWithDefault<'a> {
@@ -4382,10 +4382,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [key, value]: [u64; 2],
     ) -> BuildId<crate::kind::DictItem> {
-        let mut row = Row::new(NodeKind::DictItem, range);
+        let mut row = Row::new(NodeKind::DictItem);
         row.set_dict_item_key(split_words(key)[0]);
         row.set_dict_item_value(split_words(value)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::DictItem<'a> {
@@ -4427,10 +4427,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [arg, value]: [u64; 2],
     ) -> BuildId<crate::kind::Keyword> {
-        let mut row = Row::new(NodeKind::Keyword, range);
+        let mut row = Row::new(NodeKind::Keyword);
         row.set_keyword_arg(split_words(arg)[0]);
         row.set_keyword_value(split_words(value)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::Keyword<'a> {
@@ -4472,10 +4472,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [name, asname]: [u64; 2],
     ) -> BuildId<crate::kind::Alias> {
-        let mut row = Row::new(NodeKind::Alias, range);
+        let mut row = Row::new(NodeKind::Alias);
         row.set_alias_name(split_words(name)[0]);
         row.set_alias_asname(split_words(asname)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::Alias<'a> {
@@ -4517,10 +4517,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [context_expr, optional_vars]: [u64; 2],
     ) -> BuildId<crate::kind::WithItem> {
-        let mut row = Row::new(NodeKind::WithItem, range);
+        let mut row = Row::new(NodeKind::WithItem);
         row.set_with_item_context_expr(split_words(context_expr)[0]);
         row.set_with_item_optional_vars(split_words(optional_vars)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::WithItem<'a> {
@@ -4563,14 +4563,14 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [pattern, guard, body]: [u64; 3],
     ) -> BuildId<crate::kind::MatchCase> {
-        let mut row = Row::new(NodeKind::MatchCase, range);
+        let mut row = Row::new(NodeKind::MatchCase);
         row.set_match_case_pattern(split_words(pattern)[0]);
         row.set_match_case_guard(split_words(guard)[0]);
         row.set_match_case_extra_offset(offset(self.ast.extra.len()));
         self.ast
             .extra
             .extend([split_words(body)[0], split_words(body)[1]]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::MatchCase<'a> {
@@ -4619,9 +4619,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [expression]: [u64; 1],
     ) -> BuildId<crate::kind::Decorator> {
-        let mut row = Row::new(NodeKind::Decorator, range);
+        let mut row = Row::new(NodeKind::Decorator);
         row.set_decorator_expression(split_words(expression)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::Decorator<'a> {
@@ -4658,10 +4658,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [test, body]: [u64; 2],
     ) -> BuildId<crate::kind::ElifElseClause> {
-        let mut row = Row::new(NodeKind::ElifElseClause, range);
+        let mut row = Row::new(NodeKind::ElifElseClause);
         row.set_elif_else_clause_test(split_words(test)[0]);
         row.set_elif_else_clause_body(body);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::ElifElseClause<'a> {
@@ -4702,9 +4702,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [type_params]: [u64; 1],
     ) -> BuildId<crate::kind::TypeParams> {
-        let mut row = Row::new(NodeKind::TypeParams, range);
+        let mut row = Row::new(NodeKind::TypeParams);
         row.set_type_params_type_params(type_params);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::TypeParams<'a> {
@@ -4741,10 +4741,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [elements, flags]: [u64; 2],
     ) -> BuildId<crate::kind::FString> {
-        let mut row = Row::new(NodeKind::FString, range);
+        let mut row = Row::new(NodeKind::FString);
         row.set_f_string_elements(elements);
         row.set_f_string_flags(flags.to_le_bytes()[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::FString<'a> {
@@ -4786,10 +4786,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [elements, flags]: [u64; 2],
     ) -> BuildId<crate::kind::TString> {
-        let mut row = Row::new(NodeKind::TString, range);
+        let mut row = Row::new(NodeKind::TString);
         row.set_t_string_elements(elements);
         row.set_t_string_flags(flags.to_le_bytes()[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::TString<'a> {
@@ -4838,10 +4838,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value, flags]: [u64; 2],
     ) -> BuildId<crate::kind::StringLiteral> {
-        let mut row = Row::new(NodeKind::StringLiteral, range);
+        let mut row = Row::new(NodeKind::StringLiteral);
         row.set_string_literal_value(value);
         row.set_string_literal_flags(flags.to_le_bytes()[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::StringLiteral<'a> {
@@ -4886,10 +4886,10 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [value, flags]: [u64; 2],
     ) -> BuildId<crate::kind::BytesLiteral> {
-        let mut row = Row::new(NodeKind::BytesLiteral, range);
+        let mut row = Row::new(NodeKind::BytesLiteral);
         row.set_bytes_literal_value(value);
         row.set_bytes_literal_flags(flags.to_le_bytes()[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::BytesLiteral<'a> {
@@ -4933,9 +4933,9 @@ impl Builder {
         range: ruff_text_size::TextRange,
         [id]: [u64; 1],
     ) -> BuildId<crate::kind::Identifier> {
-        let mut row = Row::new(NodeKind::Identifier, range);
+        let mut row = Row::new(NodeKind::Identifier);
         row.set_identifier_id(split_words(id)[0]);
-        self.push(row)
+        self.push(row, range)
     }
 }
 impl<'a> crate::Identifier<'a> {
