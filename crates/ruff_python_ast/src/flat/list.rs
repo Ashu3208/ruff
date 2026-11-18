@@ -226,7 +226,7 @@ impl Element for PatternArgumentId {
 /// The children of one type in a heterogeneous, source-ordered AST list.
 pub struct FilteredNodes<'a, T> {
     ast: &'a Ast,
-    words: &'a [u32],
+    range: Interval,
     marker: PhantomData<fn() -> T>,
 }
 
@@ -250,13 +250,17 @@ impl<'a, T: NodeType> FilteredNodes<'a, T> {
     pub(super) fn new<E: Element>(items: List<'a, E>) -> Self {
         Self {
             ast: items.ast,
-            words: items.words(),
+            range: items.range,
             marker: PhantomData,
         }
     }
 
     pub fn iter(self) -> FilteredNodeIter<'a, T> {
-        FilteredNodeIter(self)
+        FilteredNodeIter {
+            ast: self.ast,
+            words: &self.ast.extra[self.range.indices()],
+            marker: PhantomData,
+        }
     }
     pub fn is_empty(self) -> bool {
         self.first().is_none()
@@ -275,7 +279,8 @@ impl<'a, T: NodeType> FilteredNodes<'a, T> {
 
     pub fn split_first(self) -> Option<(T::Borrowed<'a>, Self)> {
         let mut iter = self.iter();
-        Some((iter.next()?, iter.0))
+        let first = iter.next()?;
+        Some((first, self.suffix(iter.words.len())))
     }
 
     #[must_use]
@@ -284,7 +289,14 @@ impl<'a, T: NodeType> FilteredNodes<'a, T> {
         if n > 0 {
             iter.nth(n - 1);
         }
-        iter.0
+        self.suffix(iter.words.len())
+    }
+
+    fn suffix(self, remaining: usize) -> Self {
+        Self {
+            range: Interval::new(self.range.indices().end - remaining, remaining),
+            ..self
+        }
     }
 
     pub fn first(self) -> Option<T::Borrowed<'a>> {
@@ -295,6 +307,9 @@ impl<'a, T: NodeType> FilteredNodes<'a, T> {
     }
 
     pub fn as_array<const N: usize>(self) -> Option<[T::Borrowed<'a>; N]> {
+        if (self.range.len as usize) < N {
+            return None;
+        }
         itertools::Itertools::collect_array(self.iter())
     }
 }
@@ -307,25 +322,29 @@ impl<'a, T: NodeType> IntoIterator for FilteredNodes<'a, T> {
     }
 }
 
-pub struct FilteredNodeIter<'a, T>(FilteredNodes<'a, T>);
+pub struct FilteredNodeIter<'a, T> {
+    ast: &'a Ast,
+    words: &'a [u32],
+    marker: PhantomData<fn() -> T>,
+}
 
 impl<T> Clone for FilteredNodeIter<'_, T> {
     fn clone(&self) -> Self {
-        Self(self.0)
+        Self { ..*self }
     }
 }
 
 impl<'a, T: NodeType> Iterator for FilteredNodeIter<'a, T> {
     type Item = T::Borrowed<'a>;
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (0, Some(self.0.words.len()))
+        (0, Some(self.words.len()))
     }
     fn last(mut self) -> Option<Self::Item> {
         self.next_back()
     }
     fn next(&mut self) -> Option<Self::Item> {
-        while let Some(word) = self.0.words.split_off_first() {
-            let node: super::SyntaxNode<'_> = self.0.ast.child(u64::from(*word));
+        while let Some(word) = self.words.split_off_first() {
+            let node: super::SyntaxNode<'_> = self.ast.child(u64::from(*word));
             if let Some(node) = node.cast::<T::Borrowed<'a>>() {
                 return Some(node);
             }
@@ -342,8 +361,8 @@ impl<'a, T: NodeType> From<NodeList<'a, T>> for FilteredNodes<'a, T> {
 
 impl<'a, T: NodeType> DoubleEndedIterator for FilteredNodeIter<'a, T> {
     fn next_back(&mut self) -> Option<T::Borrowed<'a>> {
-        while let Some(word) = self.0.words.split_off_last() {
-            let node: super::SyntaxNode<'_> = self.0.ast.child(u64::from(*word));
+        while let Some(word) = self.words.split_off_last() {
+            let node: super::SyntaxNode<'_> = self.ast.child(u64::from(*word));
             if let Some(node) = node.cast::<T::Borrowed<'a>>() {
                 return Some(node);
             }
@@ -967,6 +986,7 @@ mod tests {
 
     use super::Interval;
     use crate::flat::{Builder, Emit, build};
+    use crate::kind;
 
     #[test]
     fn node_positions_use_ids_from_the_same_tree() {
@@ -982,6 +1002,66 @@ mod tests {
         let mut other = Builder::default();
         let (a, ..) = build::StmtPass { range }.emit(&mut other);
         assert_eq!(list.position_of(other.get(a)), None);
+    }
+
+    #[test]
+    fn filtered_nodes_track_mixed_argument_positions() {
+        let range = TextRange::default();
+        let mut builder = Builder::default();
+        let (a, ..) = build::ExprNoneLiteral { range }.emit(&mut builder);
+        let (b, ..) = build::ExprNoneLiteral { range }.emit(&mut builder);
+        let a: crate::flat::BuildId<kind::Expr> = a.into();
+        let b: crate::flat::BuildId<kind::Expr> = b.into();
+        let (keyword_a, ..) = build::Keyword {
+            range,
+            arg: None,
+            value: a,
+        }
+        .emit(&mut builder);
+        let (keyword_b, ..) = build::Keyword {
+            range,
+            arg: None,
+            value: b,
+        }
+        .emit(&mut builder);
+        let ids = builder.list([
+            super::ArgumentId::Positional(a),
+            super::ArgumentId::Keyword(keyword_a),
+            super::ArgumentId::Positional(b),
+            super::ArgumentId::Keyword(keyword_b),
+        ]);
+        let list = builder.get_list(ids);
+        let args = super::FilteredNodes::<kind::Expr>::new(list);
+        let keywords = super::FilteredNodes::<kind::Keyword>::new(list);
+
+        assert_eq!(
+            args.skip_front(0).as_array(),
+            Some([builder.get(a), builder.get(b)])
+        );
+        assert_eq!(
+            args.split_first()
+                .map(|(first, rest)| (first, rest.as_array())),
+            Some((builder.get(a), Some([builder.get(b)]))),
+        );
+        assert_eq!(args.skip_front(1).first(), Some(builder.get(b)));
+        assert!(args.skip_front(2).is_empty());
+        assert!(args.skip_front(usize::MAX).is_empty());
+        assert_eq!(args.as_array::<2>(), Some([builder.get(a), builder.get(b)]));
+        assert!(args.as_array::<3>().is_none());
+        assert!(args.as_array::<5>().is_none());
+        assert_eq!(
+            keywords.as_array(),
+            Some([builder.get(keyword_a), builder.get(keyword_b)])
+        );
+        assert_eq!(
+            keywords
+                .split_first()
+                .map(|(first, rest)| (first, rest.as_array())),
+            Some((builder.get(keyword_a), Some([builder.get(keyword_b)]))),
+        );
+        assert!(keywords.skip_front(1).skip_front(1).is_empty());
+        let empty = super::FilteredNodes::<kind::Keyword>::new(list.slice(..1));
+        assert_eq!(empty.as_array::<0>(), Some([]));
     }
 
     #[test]
