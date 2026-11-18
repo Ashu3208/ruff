@@ -1,6 +1,7 @@
 //! Discover Python files, and their corresponding [`Settings`], from the
 //! filesystem.
 
+use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::collections::BTreeSet;
 use std::ffi::OsStr;
@@ -20,12 +21,14 @@ use rustc_hash::{FxHashMap, FxHashSet};
 
 use ruff_linter::fs;
 use ruff_linter::package::PackageRoot;
-use ruff_linter::packaging::is_package;
+use ruff_linter::packaging::{detect_package_root, is_package};
+use ruff_linter::settings::LinterSettings;
+use ruff_python_ast::SourceType;
 
 use crate::configuration::Configuration;
 use crate::pyproject::settings_toml;
 use crate::settings::Settings;
-use crate::{FileResolverSettings, pyproject};
+use crate::{FileResolverSettings, FormatterSettings, pyproject};
 
 /// The root project for a Ruff invocation, including its settings and configuration discovery strategy.
 ///
@@ -239,14 +242,175 @@ impl ConfigurationAndSettings {
         project_root: &Path,
         config_path: Option<&Path>,
     ) -> Result<Self> {
-        let settings = transformer
-            .transform(configuration.clone())
-            .into_settings(project_root)?;
+        let ResolvedSettings {
+            settings,
+            config_path,
+        } = ResolvedSettings::new(
+            configuration.clone(),
+            transformer,
+            project_root,
+            config_path,
+        )?;
         Ok(Self {
             configuration,
             settings,
+            config_path,
+        })
+    }
+
+    pub fn with_overrides<'a, T: ConfigurationTransformer>(
+        &'a self,
+        overrides: &'a T,
+    ) -> SettingsForSource<'a, T> {
+        SettingsForSource {
+            project: self,
+            overrides,
+        }
+    }
+}
+
+/// Resolved Ruff settings and the configuration path used to build them.
+#[derive(Debug)]
+pub struct ResolvedSettings {
+    pub settings: Settings,
+    pub config_path: Option<PathBuf>,
+}
+
+impl ResolvedSettings {
+    fn new(
+        configuration: Configuration,
+        transformer: &dyn ConfigurationTransformer,
+        project_root: &Path,
+        config_path: Option<&Path>,
+    ) -> Result<Self> {
+        Ok(Self {
+            settings: transformer
+                .transform(configuration)
+                .into_settings(project_root)?,
             config_path: config_path.map(fs::normalize_path),
         })
+    }
+}
+
+/// Project settings with the CLI or editor overrides to apply after reading script metadata.
+pub struct SettingsForSource<'a, T> {
+    project: &'a ConfigurationAndSettings,
+    overrides: &'a T,
+}
+
+impl<'a, T: ConfigurationTransformer> SettingsForSource<'a, T> {
+    pub fn project_settings(&self) -> &'a Settings {
+        &self.project.settings
+    }
+
+    /// Resolve settings that depend on the contents of a Python script. An inline
+    /// `[tool.ruff]` is a configuration file in its own right, even when empty.
+    pub fn resolve_script(
+        &self,
+        path: Option<&Path>,
+        source_type: SourceType,
+        source: &str,
+    ) -> Result<Option<ResolvedSettings>> {
+        if !self
+            .project
+            .settings
+            .should_read_script_metadata(source_type)
+        {
+            return Ok(None);
+        }
+        let Some(metadata) =
+            pyproject::ScriptMetadata::parse(source, path, self.overrides.use_inline_config())?
+        else {
+            return Ok(None);
+        };
+
+        if self.overrides.overrides_script_config() {
+            return Ok(None);
+        }
+        let target_version = metadata.target_version()?;
+
+        if let Some(options) = metadata.options {
+            let root = fs::normalize_path(path.and_then(Path::parent).unwrap_or(Path::new(".")));
+            let mut configuration = Configuration::from_options(options, path, &root)?;
+            if let Some(version) = target_version {
+                configuration.target_version.get_or_insert(version.into());
+                // Only the script's own per-file targets can override its requirement.
+                configuration
+                    .per_file_target_version
+                    .get_or_insert_default();
+            }
+            if let Some(extend) = &configuration.extend {
+                let base = resolve_configuration(&root.join(extend), ConfigurationOrigin::Unknown)?;
+                configuration = configuration.combine(base);
+            }
+            if let Some(user_config) = pyproject::find_user_settings_toml() {
+                let user_configuration = resolve_configuration(
+                    &user_config,
+                    ConfigurationOrigin::ScriptUserSettings { root: &root },
+                )?;
+                configuration = configuration.combine(user_configuration);
+            }
+            return ResolvedSettings::new(configuration, self.overrides, &root, path).map(Some);
+        }
+
+        let Some(version) = target_version else {
+            return Ok(None);
+        };
+        let configuration = Configuration {
+            target_version: Some(version.into()),
+            per_file_target_version: Some(Vec::new()),
+            ..self.project.configuration.clone()
+        };
+        ResolvedSettings::new(
+            configuration,
+            self.overrides,
+            &self.project.settings.file_resolver.project_root,
+            self.project.config_path.as_deref(),
+        )
+        .map(Some)
+    }
+
+    pub fn linter(
+        &self,
+        path: Option<&Path>,
+        source_type: SourceType,
+        source: &str,
+    ) -> Result<Cow<'a, LinterSettings>> {
+        Ok(match self.resolve_script(path, source_type, source)? {
+            Some(script) => Cow::Owned(script.settings.linter),
+            None => Cow::Borrowed(&self.project.settings.linter),
+        })
+    }
+
+    pub fn formatter(
+        &self,
+        path: Option<&Path>,
+        source_type: SourceType,
+        source: &str,
+    ) -> Result<Cow<'a, FormatterSettings>> {
+        Ok(match self.resolve_script(path, source_type, source)? {
+            Some(script) => Cow::Owned(script.settings.formatter),
+            None => Cow::Borrowed(&self.project.settings.formatter),
+        })
+    }
+
+    /// Reuse the package root from file discovery unless the script changes which
+    /// directories count as namespace packages.
+    pub fn package_root<'p>(
+        &self,
+        path: &'p Path,
+        package: Option<PackageRoot<'p>>,
+        linter: &LinterSettings,
+    ) -> Option<PackageRoot<'p>> {
+        if linter.namespace_packages == self.project.settings.linter.namespace_packages {
+            return package;
+        }
+        let root = detect_package_root(path.parent()?, &linter.namespace_packages)?;
+        Some(
+            package
+                .filter(|package| package.path() == root)
+                .unwrap_or_else(|| PackageRoot::root(root)),
+        )
     }
 }
 
@@ -282,6 +446,16 @@ fn is_package_with_cache<'a>(
 /// Used to override options with the values provided by the CLI.
 pub trait ConfigurationTransformer {
     fn transform(&self, config: Configuration) -> Configuration;
+
+    /// Whether an explicitly selected configuration file replaces script settings.
+    fn overrides_script_config(&self) -> bool {
+        false
+    }
+
+    /// Whether to load Ruff configuration embedded in a script, including files it extends.
+    fn use_inline_config(&self) -> bool {
+        true
+    }
 }
 
 /// Configurations shared during one traversal, before inheritance and overrides.
@@ -435,17 +609,23 @@ pub enum ConfigurationOrigin<'a> {
     UserSpecified,
     /// User-level configuration and the directory from which to infer a Python version.
     UserSettings { fallback_directory: &'a Path },
+    /// User-level defaults for a script, without project target-version fallbacks.
+    ScriptUserSettings { root: &'a Path },
     /// In parent or higher ancestor directory of path
     Ancestor,
 }
 
-impl ConfigurationOrigin<'_> {
-    fn project_root(self, path: &Path) -> &Path {
+impl<'a> ConfigurationOrigin<'a> {
+    fn project_root<'p>(self, path: &'p Path) -> &'p Path
+    where
+        'a: 'p,
+    {
         match self {
             Self::Unknown | Self::Ancestor => path
                 .parent()
                 .expect("Expected pyproject.toml file to be in parent directory"),
             Self::UserSpecified | Self::UserSettings { .. } => &path_dedot::CWD,
+            Self::ScriptUserSettings { root } => root,
         }
     }
 }
