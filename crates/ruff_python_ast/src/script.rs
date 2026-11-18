@@ -63,18 +63,22 @@ impl ScriptTag {
     ///
     /// See: <https://peps.python.org/pep-0723/>
     pub fn parse(contents: &[u8]) -> Option<Self> {
-        FINDER
-            .find_iter(contents)
-            .find_map(|index| Self::parse_at(contents, index))
+        let contents = std::str::from_utf8(contents).ok()?;
+        let mut skip_until = 0;
+        FINDER.find_iter(contents.as_bytes()).find_map(|index| {
+            if index < skip_until {
+                return None;
+            }
+            Self::parse_at(contents, index, &mut skip_until)
+        })
     }
 
-    fn parse_at(contents: &[u8], index: usize) -> Option<Self> {
+    fn parse_at(contents: &str, index: usize, skip_until: &mut usize) -> Option<Self> {
         // The opening pragma must be the first line, or immediately preceded by a newline.
-        if !(index == 0 || matches!(contents[index - 1], b'\r' | b'\n')) {
+        if !(index == 0 || matches!(contents.as_bytes()[index - 1], b'\r' | b'\n')) {
             return None;
         }
 
-        let contents = std::str::from_utf8(contents).ok()?;
         let contents = &contents[index..];
 
         let start = TextSize::try_from(index).ok()?;
@@ -117,6 +121,9 @@ impl ScriptTag {
             source_map.push_marker(metadata.text_len(), line.start() + prefix_length);
             metadata.push_str(content);
             metadata.push('\n');
+            // If this block has no closing delimiter, any opening inside the same
+            // comment block would scan the same suffix and fail for the same reason.
+            *skip_until = usize::from(line.end());
         }
 
         // The last closing `# ///` wins, so discard that delimiter and everything after it.
@@ -204,6 +211,27 @@ mod tests {
     use ruff_text_size::{Ranged, TextLen, TextRange};
 
     use super::ScriptTag;
+
+    #[test]
+    fn overlapping_unclosed_script_tags() -> Result<(), &'static str> {
+        let mut source = r"# /// script
+"
+        .repeat(2_000);
+        source.push_str(
+            r"x = 1
+# /// script
+# dependencies = []
+# ///
+",
+        );
+        let tag = ScriptTag::parse(source.as_bytes()).ok_or("Expected valid script metadata")?;
+        assert_eq!(
+            tag.metadata(),
+            r"dependencies = []
+"
+        );
+        Ok(())
+    }
 
     #[test]
     fn carriage_return_line_endings() -> Result<(), &'static str> {
