@@ -21,9 +21,7 @@ use ruff_linter::settings::{LinterSettings, flags};
 use ruff_linter::{IOError, Violation, fs, warn_user_once};
 use ruff_source_file::SourceFileBuilder;
 use ruff_text_size::TextRange;
-use ruff_workspace::resolver::{
-    PyprojectConfig, ResolvedFile, match_exclusion, project_files_in_path,
-};
+use ruff_workspace::resolver::{ResolvedFile, RootProject, match_exclusion, project_files_in_path};
 
 use crate::args::ConfigArguments;
 use crate::cache::{Cache, PackageCacheMap, PackageCaches};
@@ -32,7 +30,7 @@ use crate::diagnostics::Diagnostics;
 /// Run the linter over a collection of files.
 pub(crate) fn check(
     files: &[PathBuf],
-    pyproject_config: &PyprojectConfig,
+    project_config: &RootProject,
     config_arguments: &ConfigArguments,
     cache: flags::Cache,
     noqa: flags::Noqa,
@@ -41,7 +39,7 @@ pub(crate) fn check(
 ) -> Result<Diagnostics> {
     // Collect all the Python files to check.
     let start = Instant::now();
-    let (mut paths, resolver) = project_files_in_path(files, pyproject_config, config_arguments)?;
+    let (mut paths, resolver) = project_files_in_path(files, project_config, config_arguments)?;
     debug!("Identified files to lint in: {:?}", start.elapsed());
 
     // Filter out paths for file types not supported for linting
@@ -232,7 +230,7 @@ mod test {
     use ruff_linter::settings::types::UnsafeFixes;
     use ruff_linter::settings::{LinterSettings, flags};
     use ruff_workspace::Settings;
-    use ruff_workspace::resolver::{PyprojectConfig, PyprojectDiscoveryStrategy};
+    use ruff_workspace::resolver::{PyprojectDiscoveryStrategy, RootProject};
 
     use crate::args::ConfigArguments;
 
@@ -266,13 +264,12 @@ mod test {
             linter: LinterSettings::for_rules(vec![rule_code, Rule::InvalidPyprojectToml]),
             ..Settings::default()
         };
-        let pyproject_config =
-            PyprojectConfig::new(PyprojectDiscoveryStrategy::Fixed, settings, None);
+        let project_config = RootProject::new(PyprojectDiscoveryStrategy::Fixed, settings, None);
 
         // Run
         let diagnostics = check(
             &[tempdir.path().to_path_buf()],
-            &pyproject_config,
+            &project_config,
             &ConfigArguments::default(),
             flags::Cache::Disabled,
             flags::Noqa::Disabled,
