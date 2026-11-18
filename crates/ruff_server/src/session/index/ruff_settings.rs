@@ -22,10 +22,14 @@ use crate::session::Client;
 use crate::session::options::ConfigurationPreference;
 use crate::session::settings::{EditorSettings, ResolvedConfiguration};
 
-#[derive(Debug)]
-pub(crate) struct RuffSettings(ConfigurationAndSettings);
+#[derive(Debug, Clone)]
+pub(crate) struct RuffSettings(Arc<ConfigurationAndSettings>);
 
 impl RuffSettings {
+    fn resolved(configuration: ConfigurationAndSettings) -> Self {
+        Self(Arc::new(configuration))
+    }
+
     pub(crate) fn path(&self) -> Option<&Path> {
         self.0.config_path.as_deref()
     }
@@ -41,8 +45,8 @@ impl Deref for RuffSettings {
 
 pub(super) struct RuffSettingsIndex {
     /// Index from folder to the resolved ruff settings.
-    index: BTreeMap<PathBuf, Arc<RuffSettings>>,
-    fallback: Arc<RuffSettings>,
+    index: BTreeMap<PathBuf, RuffSettings>,
+    fallback: RuffSettings,
 }
 
 impl std::fmt::Display for RuffSettings {
@@ -74,7 +78,7 @@ impl RuffSettings {
                     ConfigurationOrigin::UserSettings { fallback_directory: root },
                 )
                 .ok()
-                .map(RuffSettings)
+                .map(RuffSettings::resolved)
             })
             .unwrap_or_else(|| {
                 let fallback = find_fallback_target_version(root);
@@ -119,7 +123,7 @@ impl RuffSettings {
                     })
             });
 
-        RuffSettings(ConfigurationAndSettings {
+        RuffSettings::resolved(ConfigurationAndSettings {
             configuration,
             settings,
             config_path: None,
@@ -151,7 +155,7 @@ impl RuffSettingsIndex {
             );
             return RuffSettingsIndex {
                 index: BTreeMap::default(),
-                fallback: Arc::new(RuffSettings::editor_only(editor_settings, root)),
+                fallback: RuffSettings::editor_only(editor_settings, root),
             };
         }
 
@@ -180,7 +184,7 @@ impl RuffSettingsIndex {
                             tracing::debug!("Loaded settings from: `{}`", pyproject.display());
                             respect_gitignore =
                                 Some(resolved.settings.file_resolver.respect_gitignore);
-                            index.insert(directory.to_path_buf(), Arc::new(RuffSettings(resolved)));
+                            index.insert(directory.to_path_buf(), RuffSettings::resolved(resolved));
                             break;
                         }
                         error => {
@@ -209,7 +213,7 @@ impl RuffSettingsIndex {
             }
         }
 
-        let fallback = Arc::new(RuffSettings::fallback(editor_settings, root));
+        let fallback = RuffSettings::fallback(editor_settings, root);
 
         // If this is the default workspace, the server is running in single-file mode. What this
         // means is that the user opened a file directly (not the folder) in the editor and the
@@ -312,7 +316,7 @@ impl RuffSettingsIndex {
                                 index
                                     .write()
                                     .unwrap()
-                                    .insert(directory, Arc::new(RuffSettings(settings)));
+                                    .insert(directory, RuffSettings::resolved(settings));
                             }
                             error => {
                                 tracing::error!(
@@ -354,7 +358,7 @@ impl RuffSettingsIndex {
         }
     }
 
-    pub(super) fn get(&self, document_path: &Path) -> Arc<RuffSettings> {
+    pub(super) fn get(&self, document_path: &Path) -> RuffSettings {
         self.index
             .range(..document_path.to_path_buf())
             .rfind(|(path, _)| document_path.starts_with(path))
@@ -363,7 +367,7 @@ impl RuffSettingsIndex {
             .clone()
     }
 
-    pub(super) fn fallback(&self) -> Arc<RuffSettings> {
+    pub(super) fn fallback(&self) -> RuffSettings {
         self.fallback.clone()
     }
 

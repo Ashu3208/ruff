@@ -58,7 +58,7 @@ pub(crate) enum DocumentQuery {
     Text {
         file_uri: Uri,
         document: Arc<TextDocument>,
-        settings: Arc<RuffSettings>,
+        settings: RuffSettings,
     },
     Notebook {
         /// The selected notebook cell, if it exists.
@@ -66,7 +66,7 @@ pub(crate) enum DocumentQuery {
         /// The URI of the notebook.
         file_uri: Uri,
         notebook: Arc<NotebookDocument>,
-        settings: Arc<RuffSettings>,
+        settings: RuffSettings,
     },
 }
 
@@ -237,10 +237,7 @@ impl Index {
                 // in case this is an unsaved (untitled) document.
                 let path = Path::new(uri.path());
                 let root = path.parent().unwrap_or(path);
-                Arc::new(RuffSettings::fallback(
-                    global.to_settings().editor_settings(),
-                    root,
-                ))
+                RuffSettings::fallback(global.to_settings().editor_settings(), root)
             });
 
         let controller = self.documents.get(&uri)?;
@@ -495,7 +492,7 @@ impl DocumentController {
         &self,
         cell_uri: Option<Uri>,
         file_uri: Uri,
-        settings: Arc<RuffSettings>,
+        settings: RuffSettings,
     ) -> DocumentQuery {
         match &self {
             Self::Notebook(notebook) => DocumentQuery::Notebook {
