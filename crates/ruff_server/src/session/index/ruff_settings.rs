@@ -70,7 +70,7 @@ impl RuffSettings {
                 );
                 ruff_workspace::resolver::resolve_root_settings(
                     &user_settings,
-                    &EditorConfigurationTransformer(editor_settings, root),
+                    &EditorConfigurationTransformer::new(editor_settings, root),
                     ConfigurationOrigin::UserSettings { fallback_directory: root },
                 )
                 .ok()
@@ -105,7 +105,7 @@ impl RuffSettings {
         root: &Path,
         configuration: Configuration,
     ) -> RuffSettings {
-        let settings = EditorConfigurationTransformer(editor_settings, root)
+        let settings = EditorConfigurationTransformer::new(editor_settings, root)
             .transform(configuration.clone())
             .into_settings(root)
             .unwrap_or_else(|error| {
@@ -173,7 +173,7 @@ impl RuffSettingsIndex {
                 Ok(Some(pyproject)) => {
                     match ruff_workspace::resolver::resolve_root_settings(
                         &pyproject,
-                        &EditorConfigurationTransformer(editor_settings, root),
+                        &EditorConfigurationTransformer::new(editor_settings, root),
                         ConfigurationOrigin::Ancestor,
                     ) {
                         Ok(resolved) => {
@@ -300,7 +300,7 @@ impl RuffSettingsIndex {
                     Ok(Some(pyproject)) => {
                         match ruff_workspace::resolver::resolve_root_settings(
                             &pyproject,
-                            &EditorConfigurationTransformer(editor_settings, root),
+                            &EditorConfigurationTransformer::new(editor_settings, root),
                             ConfigurationOrigin::Ancestor,
                         ) {
                             Ok(settings) => {
@@ -373,10 +373,13 @@ impl RuffSettingsIndex {
     }
 }
 
-struct EditorConfigurationTransformer<'a>(&'a EditorSettings, &'a Path);
+struct EditorConfigurationTransformer {
+    configuration: Configuration,
+    preference: ConfigurationPreference,
+}
 
-impl ConfigurationTransformer for EditorConfigurationTransformer<'_> {
-    fn transform(&self, filesystem_configuration: Configuration) -> Configuration {
+impl EditorConfigurationTransformer {
+    fn new(settings: &EditorSettings, project_root: &Path) -> Self {
         let EditorSettings {
             configuration,
             format_preview,
@@ -388,9 +391,7 @@ impl ConfigurationTransformer for EditorConfigurationTransformer<'_> {
             exclude,
             line_length,
             configuration_preference,
-        } = self.0.clone();
-
-        let project_root = self.1;
+        } = settings.clone();
 
         let editor_configuration = Configuration {
             lint: LintConfiguration {
@@ -459,7 +460,17 @@ impl ConfigurationTransformer for EditorConfigurationTransformer<'_> {
             editor_configuration
         };
 
-        match configuration_preference {
+        Self {
+            configuration: editor_configuration,
+            preference: configuration_preference,
+        }
+    }
+}
+
+impl ConfigurationTransformer for EditorConfigurationTransformer {
+    fn transform(&self, filesystem_configuration: Configuration) -> Configuration {
+        let editor_configuration = self.configuration.clone();
+        match self.preference {
             ConfigurationPreference::EditorFirst => {
                 editor_configuration.combine(filesystem_configuration)
             }
@@ -498,8 +509,9 @@ mod tests {
             ..Default::default()
         };
 
-        let config = EditorConfigurationTransformer(&editor_settings, Path::new("/src/project"))
-            .transform(Configuration::default());
+        let config =
+            EditorConfigurationTransformer::new(&editor_settings, Path::new("/src/project"))
+                .transform(Configuration::default());
 
         assert_eq!(config.line_length.unwrap().value(), 120);
     }
@@ -517,8 +529,9 @@ mod tests {
             ..Default::default()
         };
 
-        let config = EditorConfigurationTransformer(&editor_settings, Path::new("/src/project"))
-            .transform(Configuration::default());
+        let config =
+            EditorConfigurationTransformer::new(&editor_settings, Path::new("/src/project"))
+                .transform(Configuration::default());
 
         assert_eq!(config.line_length.unwrap().value(), 100);
     }
