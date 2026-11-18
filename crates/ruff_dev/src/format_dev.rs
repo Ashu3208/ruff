@@ -46,14 +46,14 @@ fn parse_cli(dirs: &[PathBuf]) -> anyhow::Result<(FormatArguments, ConfigArgumen
     Ok((cli, config_arguments))
 }
 
-/// Find the [`RootProject`] to use for formatting.
+/// Configure discovery for the Python files used in the formatter comparison.
 fn project_config_for_formatting(
     cli: &FormatArguments,
     config_arguments: &ConfigArguments,
 ) -> anyhow::Result<RootProject> {
     let mut project_config = resolve(config_arguments, cli.stdin_filename.as_deref())?;
     // We don't want to format pyproject.toml
-    project_config.settings.file_resolver.include = FilePatternSet::try_from_iter([
+    project_config.root.settings.file_resolver.include = FilePatternSet::try_from_iter([
         FilePattern::Builtin("*.py"),
         FilePattern::Builtin("*.pyi"),
     ])

@@ -280,7 +280,7 @@ pub fn check(args: CheckCommand, global_options: GlobalConfigArgs) -> Result<Exi
         output_format,
         show_fixes,
         ..
-    } = project_config.settings;
+    } = project_config.root.settings;
 
     // Fix rules are as follows:
     // - By default, generate all fixes, but don't apply them to the filesystem.
@@ -369,8 +369,8 @@ pub fn check(args: CheckCommand, global_options: GlobalConfigArgs) -> Result<Exi
     // the settings should already be combined with the CLI overrides at this point
     // TODO: this should reference the global preview mode once https://github.com/astral-sh/ruff/issues/8232
     //   is resolved.
-    let preview = project_config.settings.linter.preview;
-    let prefer_rule_codes = project_config.settings.output_prefer_rule_codes;
+    let preview = project_config.root.settings.linter.preview;
+    let prefer_rule_codes = project_config.root.settings.output_prefer_rule_codes;
 
     if cli.watch {
         // Configure the file watcher.
@@ -379,7 +379,7 @@ pub fn check(args: CheckCommand, global_options: GlobalConfigArgs) -> Result<Exi
         for file in &files {
             watcher.watch(file, RecursiveMode::Recursive)?;
         }
-        if let Some(file) = project_config.config_path.as_ref() {
+        if let Some(file) = project_config.root.config_path.as_ref() {
             watcher.watch(file, RecursiveMode::Recursive)?;
         }
 

@@ -27,7 +27,7 @@ pub(crate) fn analyze_graph(
     // Construct the "default" settings. These are used when no `pyproject.toml`
     // files are present, or files are injected from outside the hierarchy.
     let project_config = resolve(config_arguments, None)?;
-    if project_config.settings.analyze.preview.is_disabled() {
+    if project_config.root.settings.analyze.preview.is_disabled() {
         warn_user!("`ruff analyze graph` is experimental and may change without warning");
     }
 
@@ -80,6 +80,7 @@ pub(crate) fn analyze_graph(
     // directories.
     src_roots.extend(
         project_config
+            .root
             .settings
             .linter
             .src
