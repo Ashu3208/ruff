@@ -875,14 +875,17 @@ impl<'a, E: Element> List<'a, E> {
 
 pub struct Iter<'a, E> {
     ast: &'a Ast,
-    words: &'a [u32],
-    end: usize,
+    words: std::slice::Iter<'a, u32>,
     marker: PhantomData<E>,
 }
 
 impl<E> Clone for Iter<'_, E> {
     fn clone(&self) -> Self {
-        Self { ..*self }
+        Self {
+            ast: self.ast,
+            words: self.words.clone(),
+            marker: PhantomData,
+        }
     }
 }
 
@@ -899,9 +902,14 @@ impl<'a, E: Element> Iter<'a, E> {
     }
 
     pub fn as_slice(&self) -> List<'a, E> {
+        let words = self.words.as_slice();
         List {
             ast: self.ast,
-            range: Interval::new(self.end - self.words.len(), self.len()),
+            // `words` always remains a subslice of this arena, including when exhausted.
+            range: Interval::new(
+                (words.as_ptr().addr() - self.ast.extra.as_ptr().addr()) / size_of::<u32>(),
+                self.len(),
+            ),
             element: PhantomData,
         }
     }
@@ -913,11 +921,10 @@ impl<'a, E: Element> IntoIterator for List<'a, E> {
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        let words = self.words();
+        let words = self.words().iter();
         Iter {
             ast: self.ast,
             words,
-            end: self.range.start as usize + words.len(),
             marker: PhantomData,
         }
     }
@@ -928,26 +935,61 @@ impl<'a, E: Element> Iterator for Iter<'a, E> {
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        Some(E::read(self.ast, *self.words.split_off_first()?))
+        Some(E::read(self.ast, *self.words.next()?))
     }
 
     fn nth(&mut self, n: usize) -> Option<Self::Item> {
-        self.words = self.words.get(n..).unwrap_or_default();
-        self.next()
+        Some(E::read(self.ast, *self.words.nth(n)?))
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
         let count = self.words.len();
         (count, Some(count))
     }
+
+    fn any<F>(&mut self, mut f: F) -> bool
+    where
+        F: FnMut(Self::Item) -> bool,
+    {
+        let ast = self.ast;
+        self.words.any(|&word| f(E::read(ast, word)))
+    }
+
+    fn find<F>(&mut self, mut f: F) -> Option<Self::Item>
+    where
+        F: FnMut(&Self::Item) -> bool,
+    {
+        let ast = self.ast;
+        self.words.find_map(|&word| {
+            let item = E::read(ast, word);
+            f(&item).then_some(item)
+        })
+    }
+
+    fn fold<B, F>(self, init: B, mut f: F) -> B
+    where
+        F: FnMut(B, Self::Item) -> B,
+    {
+        let ast = self.ast;
+        self.words
+            .fold(init, |acc, &word| f(acc, E::read(ast, word)))
+    }
 }
 
 impl<E: Element> DoubleEndedIterator for Iter<'_, E> {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
-        let word = *self.words.split_off_last()?;
-        self.end -= 1;
+        let word = *self.words.next_back()?;
         Some(E::read(self.ast, word))
+    }
+
+    fn rfold<B, F>(self, init: B, mut f: F) -> B
+    where
+        F: FnMut(B, Self::Item) -> B,
+    {
+        let ast = self.ast;
+        self.words
+            .rfold(init, |acc, &word| f(acc, E::read(ast, word)))
     }
 }
 
@@ -985,6 +1027,7 @@ mod tests {
     use ruff_text_size::TextRange;
 
     use super::Interval;
+    use crate::AstNode;
     use crate::flat::{Builder, Emit, build};
     use crate::kind;
 
@@ -1062,6 +1105,99 @@ mod tests {
         assert!(keywords.skip_front(1).skip_front(1).is_empty());
         let empty = super::FilteredNodes::<kind::Keyword>::new(list.slice(..1));
         assert_eq!(empty.as_array::<0>(), Some([]));
+    }
+
+    #[test]
+    fn iterator_slice_tracks_front_and_back() {
+        let range = TextRange::default();
+        let mut builder = Builder::default();
+        let (a, ..) = build::StmtPass { range }.emit(&mut builder);
+        let (b, ..) = build::StmtPass { range }.emit(&mut builder);
+        let (c, ..) = build::StmtPass { range }.emit(&mut builder);
+        let ids = builder.list([a, b, c]);
+        let list = builder.get_list(ids);
+        let mut iter = list.iter();
+        assert_eq!(iter.len(), 3);
+        assert!(iter.as_slice() == list);
+        assert_eq!(iter.next(), list.get(0));
+        assert_eq!(iter.next_back(), list.get(2));
+        assert!(iter.as_slice() == list.slice(1..2));
+        assert_eq!(iter.as_slice().range.start, list.range.start + 1);
+        assert_eq!(iter.as_slice().range.len, 1);
+        let clone = iter.clone();
+        assert!(clone.as_slice() == list.slice(1..2));
+        assert!(iter.next_if(|_| false).is_none());
+        assert!(iter.as_slice() == list.slice(1..2));
+        assert_eq!(iter.next_if(|_| true), list.get(1));
+        assert!(iter.as_slice().is_empty());
+        assert!(iter.next().is_none());
+        assert!(iter.next_back().is_none());
+        let mut exhausted = list.iter();
+        assert!(exhausted.nth(usize::MAX).is_none());
+        assert!(exhausted.as_slice() == list.slice(3..3));
+        assert_eq!(exhausted.as_slice().range.start, list.range.start + 3);
+        assert_eq!(exhausted.as_slice().range.len, 0);
+        assert!(list.slice(0..0).iter().as_slice().is_empty());
+    }
+
+    #[test]
+    fn hot_short_circuiting_methods_preserve_the_cursor() {
+        let range = TextRange::default();
+        let mut builder = Builder::default();
+        let (a, ..) = build::StmtPass { range }.emit(&mut builder);
+        let (b, ..) = build::StmtPass { range }.emit(&mut builder);
+        let (c, ..) = build::StmtPass { range }.emit(&mut builder);
+        let ids = builder.list([a, b, c]);
+        let list = builder.get_list(ids);
+        let start = list.range.start;
+
+        let mut any = list.iter();
+        assert_eq!(any.next_back(), list.get(2));
+        assert!(any.any(|item| item.is_same_node(builder.get(b))));
+        assert_eq!((any.as_slice().range.start, any.len()), (start + 2, 0));
+        assert!(!any.any(|_| true));
+
+        let mut find = list.iter();
+        assert_eq!(
+            find.find(|item| item.is_same_node(builder.get(b))),
+            list.get(1)
+        );
+        assert_eq!((find.as_slice().range.start, find.len()), (start + 2, 1));
+        assert_eq!(find.find(|_| false), None);
+        assert_eq!((find.as_slice().range.start, find.len()), (start + 3, 0));
+    }
+
+    #[test]
+    fn consuming_iterator_methods_use_the_remaining_positions() {
+        let range = TextRange::default();
+        let mut builder = Builder::default();
+        let (a, ..) = build::StmtPass { range }.emit(&mut builder);
+        let (b, ..) = build::StmtPass { range }.emit(&mut builder);
+        let (c, ..) = build::StmtPass { range }.emit(&mut builder);
+        let ids = builder.list([a, b, c]);
+        let list = builder.get_list(ids);
+
+        let mut forward = list.iter();
+        assert_eq!(forward.next_back(), list.get(2));
+        let folded = forward.fold(Vec::new(), |mut items, item| {
+            items.push(list.position_of(item));
+            items
+        });
+        assert_eq!(folded, vec![Some(0), Some(1)]);
+
+        let mut reverse = list.iter();
+        assert_eq!(reverse.next(), list.get(0));
+        let folded = reverse.rfold(Vec::new(), |mut items, item| {
+            items.push(list.position_of(item));
+            items
+        });
+        assert_eq!(folded, vec![Some(2), Some(1)]);
+
+        let mut each = list.iter();
+        assert_eq!(each.next(), list.get(0));
+        let mut items = Vec::new();
+        each.for_each(|item| items.push(list.position_of(item)));
+        assert_eq!(items, vec![Some(1), Some(2)]);
     }
 
     #[test]
