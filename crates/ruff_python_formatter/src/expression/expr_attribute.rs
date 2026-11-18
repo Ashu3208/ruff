@@ -230,18 +230,14 @@ impl NeedsParentheses for ExprAttribute<'_> {
 // Non Hex, octal or binary number literals need parentheses to disambiguate the attribute `.` from
 // a decimal point. Floating point numbers don't strictly need parentheses but it reads better (rather than 0.0.test()).
 fn is_base_ten_number_literal(expr: Expr<'_>, source: &str) -> bool {
-    if let Some(ast::ExprNumberLiteralFields {
-        value,
-        range,
-        node: _,
-    }) = expr
+    if let Some(ast::ExprNumberLiteralFields { value, node }) = expr
         .as_number_literal_expr()
         .map(ruff_python_ast::ExprNumberLiteral::fields)
     {
         match value {
             Number::Float(_) => true,
             Number::Int(_) => {
-                let text = &source[range];
+                let text = &source[node.range()];
                 !matches!(
                     text.as_bytes().get(0..2),
                     Some([b'0', b'x' | b'X' | b'o' | b'O' | b'b' | b'B'])

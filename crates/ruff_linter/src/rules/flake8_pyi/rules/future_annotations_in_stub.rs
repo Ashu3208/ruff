@@ -1,4 +1,5 @@
 use ruff_python_ast::{self as ast, StmtImportFrom};
+use ruff_text_size::Ranged;
 
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 
@@ -40,7 +41,6 @@ impl Violation for FutureAnnotationsInStub {
 /// PYI044
 pub(crate) fn from_future_import(checker: &Checker, target: StmtImportFrom<'_>) {
     let ast::StmtImportFromFields {
-        range,
         module: Some(module_name),
         names,
         ..
@@ -57,7 +57,7 @@ pub(crate) fn from_future_import(checker: &Checker, target: StmtImportFrom<'_>) 
         return;
     }
 
-    let mut diagnostic = checker.report_diagnostic(FutureAnnotationsInStub, range);
+    let mut diagnostic = checker.report_diagnostic(FutureAnnotationsInStub, target.range());
 
     let stmt = checker.semantic().current_statement();
 

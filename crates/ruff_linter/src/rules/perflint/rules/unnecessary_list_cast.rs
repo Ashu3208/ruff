@@ -84,26 +84,13 @@ pub(crate) fn unnecessary_list_cast(checker: &Checker, iter: Expr<'_>, body: Sui
     }
 
     match arg.fields() {
-        ast::ExprFields::Tuple(ast::ExprTupleFields {
-            range: iterable_range,
-            ..
-        })
-        | ast::ExprFields::List(ast::ExprListFields {
-            range: iterable_range,
-            ..
-        })
-        | ast::ExprFields::Set(ast::ExprSetFields {
-            range: iterable_range,
-            ..
-        }) => {
+        ast::ExprFields::Tuple(ast::ExprTupleFields { .. })
+        | ast::ExprFields::List(ast::ExprListFields { .. })
+        | ast::ExprFields::Set(ast::ExprSetFields { .. }) => {
             let mut diagnostic = checker.report_diagnostic(UnnecessaryListCast, iter.range());
-            diagnostic.set_fix(remove_cast(checker, iter.range(), iterable_range));
+            diagnostic.set_fix(remove_cast(checker, iter.range(), arg.range()));
         }
-        ast::ExprFields::Name(ast::ExprNameFields {
-            id,
-            range: iterable_range,
-            ..
-        }) => {
+        ast::ExprFields::Name(ast::ExprNameFields { id, .. }) => {
             let Some(value) = find_assigned_value(id, checker.semantic()) else {
                 return;
             };
@@ -127,7 +114,7 @@ pub(crate) fn unnecessary_list_cast(checker: &Checker, iter: Expr<'_>, body: Sui
                 }
 
                 let mut diagnostic = checker.report_diagnostic(UnnecessaryListCast, iter.range());
-                diagnostic.set_fix(remove_cast(checker, iter.range(), iterable_range));
+                diagnostic.set_fix(remove_cast(checker, iter.range(), arg.range()));
             }
         }
         _ => {}

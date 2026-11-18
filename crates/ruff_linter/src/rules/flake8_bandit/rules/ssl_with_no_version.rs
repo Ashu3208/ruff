@@ -1,6 +1,7 @@
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast as ast;
 use ruff_python_ast::name::QualifiedName;
+use ruff_text_size::Ranged;
 
 use crate::Violation;
 use crate::checkers::ast::Checker;
@@ -46,6 +47,6 @@ pub(crate) fn ssl_with_no_version(
     if matches!(qualified_name.segments(), ["ssl", "wrap_socket"])
         && call.arguments.find_keyword("ssl_version").is_none()
     {
-        checker.report_diagnostic(SslWithNoVersion, call.range);
+        checker.report_diagnostic(SslWithNoVersion, call.range());
     }
 }

@@ -9919,15 +9919,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ModModuleFields<'a> {
         pub node: crate::ModModule<'a>,
-        pub range: ruff_text_size::TextRange,
         pub body: NodeList<'a, crate::kind::Stmt>,
+    }
+    impl Ranged for ModModuleFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ModModule<'a> {
         #[inline]
         pub fn fields(self) -> ModModuleFields<'a> {
             ModModuleFields {
                 node: self,
-                range: self.range(),
                 body: self.body(),
             }
         }
@@ -9935,15 +9939,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ModExpressionFields<'a> {
         pub node: crate::ModExpression<'a>,
-        pub range: ruff_text_size::TextRange,
         pub body: crate::Expr<'a>,
+    }
+    impl Ranged for ModExpressionFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ModExpression<'a> {
         #[inline]
         pub fn fields(self) -> ModExpressionFields<'a> {
             ModExpressionFields {
                 node: self,
-                range: self.range(),
                 body: self.body(),
             }
         }
@@ -9951,7 +9959,6 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtFunctionDefFields<'a> {
         pub node: crate::StmtFunctionDef<'a>,
-        pub range: ruff_text_size::TextRange,
         pub is_async: bool,
         pub decorator_list: NodeList<'a, crate::kind::Decorator>,
         pub name: crate::Identifier<'a>,
@@ -9960,12 +9967,17 @@ pub(crate) mod fields {
         pub returns: Option<crate::Expr<'a>>,
         pub body: NodeList<'a, crate::kind::Stmt>,
     }
+    impl Ranged for StmtFunctionDefFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
+    }
     impl<'a> crate::StmtFunctionDef<'a> {
         #[inline]
         pub fn fields(self) -> StmtFunctionDefFields<'a> {
             StmtFunctionDefFields {
                 node: self,
-                range: self.range(),
                 is_async: self.is_async(),
                 decorator_list: self.decorator_list(),
                 name: self.name(),
@@ -9979,19 +9991,23 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtClassDefFields<'a> {
         pub node: crate::StmtClassDef<'a>,
-        pub range: ruff_text_size::TextRange,
         pub decorator_list: NodeList<'a, crate::kind::Decorator>,
         pub name: crate::Identifier<'a>,
         pub type_params: Option<crate::TypeParams<'a>>,
         pub arguments: Option<crate::Arguments<'a>>,
         pub body: NodeList<'a, crate::kind::Stmt>,
     }
+    impl Ranged for StmtClassDefFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
+    }
     impl<'a> crate::StmtClassDef<'a> {
         #[inline]
         pub fn fields(self) -> StmtClassDefFields<'a> {
             StmtClassDefFields {
                 node: self,
-                range: self.range(),
                 decorator_list: self.decorator_list(),
                 name: self.name(),
                 type_params: self.type_params(),
@@ -10003,15 +10019,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtReturnFields<'a> {
         pub node: crate::StmtReturn<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: Option<crate::Expr<'a>>,
+    }
+    impl Ranged for StmtReturnFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtReturn<'a> {
         #[inline]
         pub fn fields(self) -> StmtReturnFields<'a> {
             StmtReturnFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
             }
         }
@@ -10019,15 +10039,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtDeleteFields<'a> {
         pub node: crate::StmtDelete<'a>,
-        pub range: ruff_text_size::TextRange,
         pub targets: NodeList<'a, crate::kind::Expr>,
+    }
+    impl Ranged for StmtDeleteFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtDelete<'a> {
         #[inline]
         pub fn fields(self) -> StmtDeleteFields<'a> {
             StmtDeleteFields {
                 node: self,
-                range: self.range(),
                 targets: self.targets(),
             }
         }
@@ -10035,17 +10059,21 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtTypeAliasFields<'a> {
         pub node: crate::StmtTypeAlias<'a>,
-        pub range: ruff_text_size::TextRange,
         pub name: crate::Expr<'a>,
         pub type_params: Option<crate::TypeParams<'a>>,
         pub value: crate::Expr<'a>,
+    }
+    impl Ranged for StmtTypeAliasFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtTypeAlias<'a> {
         #[inline]
         pub fn fields(self) -> StmtTypeAliasFields<'a> {
             StmtTypeAliasFields {
                 node: self,
-                range: self.range(),
                 name: self.name(),
                 type_params: self.type_params(),
                 value: self.value(),
@@ -10055,16 +10083,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtAssignFields<'a> {
         pub node: crate::StmtAssign<'a>,
-        pub range: ruff_text_size::TextRange,
         pub targets: NodeList<'a, crate::kind::Expr>,
         pub value: crate::Expr<'a>,
+    }
+    impl Ranged for StmtAssignFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtAssign<'a> {
         #[inline]
         pub fn fields(self) -> StmtAssignFields<'a> {
             StmtAssignFields {
                 node: self,
-                range: self.range(),
                 targets: self.targets(),
                 value: self.value(),
             }
@@ -10073,17 +10105,21 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtAugAssignFields<'a> {
         pub node: crate::StmtAugAssign<'a>,
-        pub range: ruff_text_size::TextRange,
         pub target: crate::Expr<'a>,
         pub op: crate::Operator,
         pub value: crate::Expr<'a>,
+    }
+    impl Ranged for StmtAugAssignFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtAugAssign<'a> {
         #[inline]
         pub fn fields(self) -> StmtAugAssignFields<'a> {
             StmtAugAssignFields {
                 node: self,
-                range: self.range(),
                 target: self.target(),
                 op: self.op(),
                 value: self.value(),
@@ -10093,18 +10129,22 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtAnnAssignFields<'a> {
         pub node: crate::StmtAnnAssign<'a>,
-        pub range: ruff_text_size::TextRange,
         pub target: crate::Expr<'a>,
         pub annotation: crate::Expr<'a>,
         pub value: Option<crate::Expr<'a>>,
         pub simple: bool,
+    }
+    impl Ranged for StmtAnnAssignFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtAnnAssign<'a> {
         #[inline]
         pub fn fields(self) -> StmtAnnAssignFields<'a> {
             StmtAnnAssignFields {
                 node: self,
-                range: self.range(),
                 target: self.target(),
                 annotation: self.annotation(),
                 value: self.value(),
@@ -10115,19 +10155,23 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtForFields<'a> {
         pub node: crate::StmtFor<'a>,
-        pub range: ruff_text_size::TextRange,
         pub is_async: bool,
         pub target: crate::Expr<'a>,
         pub iter: crate::Expr<'a>,
         pub body: NodeList<'a, crate::kind::Stmt>,
         pub orelse: NodeList<'a, crate::kind::Stmt>,
     }
+    impl Ranged for StmtForFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
+    }
     impl<'a> crate::StmtFor<'a> {
         #[inline]
         pub fn fields(self) -> StmtForFields<'a> {
             StmtForFields {
                 node: self,
-                range: self.range(),
                 is_async: self.is_async(),
                 target: self.target(),
                 iter: self.iter(),
@@ -10139,17 +10183,21 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtWhileFields<'a> {
         pub node: crate::StmtWhile<'a>,
-        pub range: ruff_text_size::TextRange,
         pub test: crate::Expr<'a>,
         pub body: NodeList<'a, crate::kind::Stmt>,
         pub orelse: NodeList<'a, crate::kind::Stmt>,
+    }
+    impl Ranged for StmtWhileFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtWhile<'a> {
         #[inline]
         pub fn fields(self) -> StmtWhileFields<'a> {
             StmtWhileFields {
                 node: self,
-                range: self.range(),
                 test: self.test(),
                 body: self.body(),
                 orelse: self.orelse(),
@@ -10159,17 +10207,21 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtIfFields<'a> {
         pub node: crate::StmtIf<'a>,
-        pub range: ruff_text_size::TextRange,
         pub test: crate::Expr<'a>,
         pub body: NodeList<'a, crate::kind::Stmt>,
         pub elif_else_clauses: NodeList<'a, crate::kind::ElifElseClause>,
+    }
+    impl Ranged for StmtIfFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtIf<'a> {
         #[inline]
         pub fn fields(self) -> StmtIfFields<'a> {
             StmtIfFields {
                 node: self,
-                range: self.range(),
                 test: self.test(),
                 body: self.body(),
                 elif_else_clauses: self.elif_else_clauses(),
@@ -10179,17 +10231,21 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtWithFields<'a> {
         pub node: crate::StmtWith<'a>,
-        pub range: ruff_text_size::TextRange,
         pub is_async: bool,
         pub items: NodeList<'a, crate::kind::WithItem>,
         pub body: NodeList<'a, crate::kind::Stmt>,
+    }
+    impl Ranged for StmtWithFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtWith<'a> {
         #[inline]
         pub fn fields(self) -> StmtWithFields<'a> {
             StmtWithFields {
                 node: self,
-                range: self.range(),
                 is_async: self.is_async(),
                 items: self.items(),
                 body: self.body(),
@@ -10199,16 +10255,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtMatchFields<'a> {
         pub node: crate::StmtMatch<'a>,
-        pub range: ruff_text_size::TextRange,
         pub subject: crate::Expr<'a>,
         pub cases: NodeList<'a, crate::kind::MatchCase>,
+    }
+    impl Ranged for StmtMatchFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtMatch<'a> {
         #[inline]
         pub fn fields(self) -> StmtMatchFields<'a> {
             StmtMatchFields {
                 node: self,
-                range: self.range(),
                 subject: self.subject(),
                 cases: self.cases(),
             }
@@ -10217,16 +10277,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtRaiseFields<'a> {
         pub node: crate::StmtRaise<'a>,
-        pub range: ruff_text_size::TextRange,
         pub exc: Option<crate::Expr<'a>>,
         pub cause: Option<crate::Expr<'a>>,
+    }
+    impl Ranged for StmtRaiseFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtRaise<'a> {
         #[inline]
         pub fn fields(self) -> StmtRaiseFields<'a> {
             StmtRaiseFields {
                 node: self,
-                range: self.range(),
                 exc: self.exc(),
                 cause: self.cause(),
             }
@@ -10235,19 +10299,23 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtTryFields<'a> {
         pub node: crate::StmtTry<'a>,
-        pub range: ruff_text_size::TextRange,
         pub body: NodeList<'a, crate::kind::Stmt>,
         pub handlers: NodeList<'a, crate::kind::ExceptHandler>,
         pub orelse: NodeList<'a, crate::kind::Stmt>,
         pub finalbody: NodeList<'a, crate::kind::Stmt>,
         pub is_star: bool,
     }
+    impl Ranged for StmtTryFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
+    }
     impl<'a> crate::StmtTry<'a> {
         #[inline]
         pub fn fields(self) -> StmtTryFields<'a> {
             StmtTryFields {
                 node: self,
-                range: self.range(),
                 body: self.body(),
                 handlers: self.handlers(),
                 orelse: self.orelse(),
@@ -10259,16 +10327,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtAssertFields<'a> {
         pub node: crate::StmtAssert<'a>,
-        pub range: ruff_text_size::TextRange,
         pub test: crate::Expr<'a>,
         pub msg: Option<crate::Expr<'a>>,
+    }
+    impl Ranged for StmtAssertFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtAssert<'a> {
         #[inline]
         pub fn fields(self) -> StmtAssertFields<'a> {
             StmtAssertFields {
                 node: self,
-                range: self.range(),
                 test: self.test(),
                 msg: self.msg(),
             }
@@ -10277,16 +10349,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtImportFields<'a> {
         pub node: crate::StmtImport<'a>,
-        pub range: ruff_text_size::TextRange,
         pub names: NodeList<'a, crate::kind::Alias>,
         pub is_lazy: bool,
+    }
+    impl Ranged for StmtImportFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtImport<'a> {
         #[inline]
         pub fn fields(self) -> StmtImportFields<'a> {
             StmtImportFields {
                 node: self,
-                range: self.range(),
                 names: self.names(),
                 is_lazy: self.is_lazy(),
             }
@@ -10295,18 +10371,22 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtImportFromFields<'a> {
         pub node: crate::StmtImportFrom<'a>,
-        pub range: ruff_text_size::TextRange,
         pub module: Option<crate::Identifier<'a>>,
         pub names: NodeList<'a, crate::kind::Alias>,
         pub level: u32,
         pub is_lazy: bool,
+    }
+    impl Ranged for StmtImportFromFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtImportFrom<'a> {
         #[inline]
         pub fn fields(self) -> StmtImportFromFields<'a> {
             StmtImportFromFields {
                 node: self,
-                range: self.range(),
                 module: self.module(),
                 names: self.names(),
                 level: self.level(),
@@ -10317,15 +10397,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtGlobalFields<'a> {
         pub node: crate::StmtGlobal<'a>,
-        pub range: ruff_text_size::TextRange,
         pub names: NodeList<'a, crate::kind::Identifier>,
+    }
+    impl Ranged for StmtGlobalFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtGlobal<'a> {
         #[inline]
         pub fn fields(self) -> StmtGlobalFields<'a> {
             StmtGlobalFields {
                 node: self,
-                range: self.range(),
                 names: self.names(),
             }
         }
@@ -10333,15 +10417,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtNonlocalFields<'a> {
         pub node: crate::StmtNonlocal<'a>,
-        pub range: ruff_text_size::TextRange,
         pub names: NodeList<'a, crate::kind::Identifier>,
+    }
+    impl Ranged for StmtNonlocalFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtNonlocal<'a> {
         #[inline]
         pub fn fields(self) -> StmtNonlocalFields<'a> {
             StmtNonlocalFields {
                 node: self,
-                range: self.range(),
                 names: self.names(),
             }
         }
@@ -10349,15 +10437,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtExprFields<'a> {
         pub node: crate::StmtExpr<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: crate::Expr<'a>,
+    }
+    impl Ranged for StmtExprFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtExpr<'a> {
         #[inline]
         pub fn fields(self) -> StmtExprFields<'a> {
             StmtExprFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
             }
         }
@@ -10365,58 +10457,68 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StmtPassFields<'a> {
         pub node: crate::StmtPass<'a>,
-        pub range: ruff_text_size::TextRange,
+    }
+    impl Ranged for StmtPassFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtPass<'a> {
         #[inline]
         pub fn fields(self) -> StmtPassFields<'a> {
-            StmtPassFields {
-                node: self,
-                range: self.range(),
-            }
+            StmtPassFields { node: self }
         }
     }
     #[derive(Clone, Copy)]
     pub struct StmtBreakFields<'a> {
         pub node: crate::StmtBreak<'a>,
-        pub range: ruff_text_size::TextRange,
+    }
+    impl Ranged for StmtBreakFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtBreak<'a> {
         #[inline]
         pub fn fields(self) -> StmtBreakFields<'a> {
-            StmtBreakFields {
-                node: self,
-                range: self.range(),
-            }
+            StmtBreakFields { node: self }
         }
     }
     #[derive(Clone, Copy)]
     pub struct StmtContinueFields<'a> {
         pub node: crate::StmtContinue<'a>,
-        pub range: ruff_text_size::TextRange,
+    }
+    impl Ranged for StmtContinueFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtContinue<'a> {
         #[inline]
         pub fn fields(self) -> StmtContinueFields<'a> {
-            StmtContinueFields {
-                node: self,
-                range: self.range(),
-            }
+            StmtContinueFields { node: self }
         }
     }
     #[derive(Clone, Copy)]
     pub struct StmtIpyEscapeCommandFields<'a> {
         pub node: crate::StmtIpyEscapeCommand<'a>,
-        pub range: ruff_text_size::TextRange,
         pub kind: crate::IpyEscapeKind,
         pub value: &'a str,
+    }
+    impl Ranged for StmtIpyEscapeCommandFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StmtIpyEscapeCommand<'a> {
         #[inline]
         pub fn fields(self) -> StmtIpyEscapeCommandFields<'a> {
             StmtIpyEscapeCommandFields {
                 node: self,
-                range: self.range(),
                 kind: self.kind(),
                 value: self.value(),
             }
@@ -10425,16 +10527,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprBoolOpFields<'a> {
         pub node: crate::ExprBoolOp<'a>,
-        pub range: ruff_text_size::TextRange,
         pub op: crate::BoolOp,
         pub values: NodeList<'a, crate::kind::Expr>,
+    }
+    impl Ranged for ExprBoolOpFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprBoolOp<'a> {
         #[inline]
         pub fn fields(self) -> ExprBoolOpFields<'a> {
             ExprBoolOpFields {
                 node: self,
-                range: self.range(),
                 op: self.op(),
                 values: self.values(),
             }
@@ -10443,16 +10549,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprNamedFields<'a> {
         pub node: crate::ExprNamed<'a>,
-        pub range: ruff_text_size::TextRange,
         pub target: crate::Expr<'a>,
         pub value: crate::Expr<'a>,
+    }
+    impl Ranged for ExprNamedFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprNamed<'a> {
         #[inline]
         pub fn fields(self) -> ExprNamedFields<'a> {
             ExprNamedFields {
                 node: self,
-                range: self.range(),
                 target: self.target(),
                 value: self.value(),
             }
@@ -10461,17 +10571,21 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprBinOpFields<'a> {
         pub node: crate::ExprBinOp<'a>,
-        pub range: ruff_text_size::TextRange,
         pub left: crate::Expr<'a>,
         pub op: crate::Operator,
         pub right: crate::Expr<'a>,
+    }
+    impl Ranged for ExprBinOpFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprBinOp<'a> {
         #[inline]
         pub fn fields(self) -> ExprBinOpFields<'a> {
             ExprBinOpFields {
                 node: self,
-                range: self.range(),
                 left: self.left(),
                 op: self.op(),
                 right: self.right(),
@@ -10481,16 +10595,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprUnaryOpFields<'a> {
         pub node: crate::ExprUnaryOp<'a>,
-        pub range: ruff_text_size::TextRange,
         pub op: crate::UnaryOp,
         pub operand: crate::Expr<'a>,
+    }
+    impl Ranged for ExprUnaryOpFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprUnaryOp<'a> {
         #[inline]
         pub fn fields(self) -> ExprUnaryOpFields<'a> {
             ExprUnaryOpFields {
                 node: self,
-                range: self.range(),
                 op: self.op(),
                 operand: self.operand(),
             }
@@ -10499,16 +10617,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprLambdaFields<'a> {
         pub node: crate::ExprLambda<'a>,
-        pub range: ruff_text_size::TextRange,
         pub parameters: Option<crate::Parameters<'a>>,
         pub body: crate::Expr<'a>,
+    }
+    impl Ranged for ExprLambdaFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprLambda<'a> {
         #[inline]
         pub fn fields(self) -> ExprLambdaFields<'a> {
             ExprLambdaFields {
                 node: self,
-                range: self.range(),
                 parameters: self.parameters(),
                 body: self.body(),
             }
@@ -10517,17 +10639,21 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprIfFields<'a> {
         pub node: crate::ExprIf<'a>,
-        pub range: ruff_text_size::TextRange,
         pub test: crate::Expr<'a>,
         pub body: crate::Expr<'a>,
         pub orelse: crate::Expr<'a>,
+    }
+    impl Ranged for ExprIfFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprIf<'a> {
         #[inline]
         pub fn fields(self) -> ExprIfFields<'a> {
             ExprIfFields {
                 node: self,
-                range: self.range(),
                 test: self.test(),
                 body: self.body(),
                 orelse: self.orelse(),
@@ -10537,15 +10663,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprDictFields<'a> {
         pub node: crate::ExprDict<'a>,
-        pub range: ruff_text_size::TextRange,
         pub items: NodeList<'a, crate::kind::DictItem>,
+    }
+    impl Ranged for ExprDictFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprDict<'a> {
         #[inline]
         pub fn fields(self) -> ExprDictFields<'a> {
             ExprDictFields {
                 node: self,
-                range: self.range(),
                 items: self.items(),
             }
         }
@@ -10553,15 +10683,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprSetFields<'a> {
         pub node: crate::ExprSet<'a>,
-        pub range: ruff_text_size::TextRange,
         pub elts: NodeList<'a, crate::kind::Expr>,
+    }
+    impl Ranged for ExprSetFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprSet<'a> {
         #[inline]
         pub fn fields(self) -> ExprSetFields<'a> {
             ExprSetFields {
                 node: self,
-                range: self.range(),
                 elts: self.elts(),
             }
         }
@@ -10569,16 +10703,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprListCompFields<'a> {
         pub node: crate::ExprListComp<'a>,
-        pub range: ruff_text_size::TextRange,
         pub elt: crate::Expr<'a>,
         pub generators: NodeList<'a, crate::kind::Comprehension>,
+    }
+    impl Ranged for ExprListCompFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprListComp<'a> {
         #[inline]
         pub fn fields(self) -> ExprListCompFields<'a> {
             ExprListCompFields {
                 node: self,
-                range: self.range(),
                 elt: self.elt(),
                 generators: self.generators(),
             }
@@ -10587,16 +10725,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprSetCompFields<'a> {
         pub node: crate::ExprSetComp<'a>,
-        pub range: ruff_text_size::TextRange,
         pub elt: crate::Expr<'a>,
         pub generators: NodeList<'a, crate::kind::Comprehension>,
+    }
+    impl Ranged for ExprSetCompFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprSetComp<'a> {
         #[inline]
         pub fn fields(self) -> ExprSetCompFields<'a> {
             ExprSetCompFields {
                 node: self,
-                range: self.range(),
                 elt: self.elt(),
                 generators: self.generators(),
             }
@@ -10605,17 +10747,21 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprDictCompFields<'a> {
         pub node: crate::ExprDictComp<'a>,
-        pub range: ruff_text_size::TextRange,
         pub key: Option<crate::Expr<'a>>,
         pub value: crate::Expr<'a>,
         pub generators: NodeList<'a, crate::kind::Comprehension>,
+    }
+    impl Ranged for ExprDictCompFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprDictComp<'a> {
         #[inline]
         pub fn fields(self) -> ExprDictCompFields<'a> {
             ExprDictCompFields {
                 node: self,
-                range: self.range(),
                 key: self.key(),
                 value: self.value(),
                 generators: self.generators(),
@@ -10625,17 +10771,21 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprGeneratorFields<'a> {
         pub node: crate::ExprGenerator<'a>,
-        pub range: ruff_text_size::TextRange,
         pub elt: crate::Expr<'a>,
         pub generators: NodeList<'a, crate::kind::Comprehension>,
         pub parenthesized: bool,
+    }
+    impl Ranged for ExprGeneratorFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprGenerator<'a> {
         #[inline]
         pub fn fields(self) -> ExprGeneratorFields<'a> {
             ExprGeneratorFields {
                 node: self,
-                range: self.range(),
                 elt: self.elt(),
                 generators: self.generators(),
                 parenthesized: self.parenthesized(),
@@ -10645,15 +10795,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprAwaitFields<'a> {
         pub node: crate::ExprAwait<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: crate::Expr<'a>,
+    }
+    impl Ranged for ExprAwaitFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprAwait<'a> {
         #[inline]
         pub fn fields(self) -> ExprAwaitFields<'a> {
             ExprAwaitFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
             }
         }
@@ -10661,15 +10815,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprYieldFields<'a> {
         pub node: crate::ExprYield<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: Option<crate::Expr<'a>>,
+    }
+    impl Ranged for ExprYieldFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprYield<'a> {
         #[inline]
         pub fn fields(self) -> ExprYieldFields<'a> {
             ExprYieldFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
             }
         }
@@ -10677,15 +10835,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprYieldFromFields<'a> {
         pub node: crate::ExprYieldFrom<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: crate::Expr<'a>,
+    }
+    impl Ranged for ExprYieldFromFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprYieldFrom<'a> {
         #[inline]
         pub fn fields(self) -> ExprYieldFromFields<'a> {
             ExprYieldFromFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
             }
         }
@@ -10693,16 +10855,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprCompareFields<'a> {
         pub node: crate::ExprCompare<'a>,
-        pub range: ruff_text_size::TextRange,
         pub ops: List<'a, crate::CmpOp>,
         pub operands: NodeList<'a, crate::kind::Expr>,
+    }
+    impl Ranged for ExprCompareFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprCompare<'a> {
         #[inline]
         pub fn fields(self) -> ExprCompareFields<'a> {
             ExprCompareFields {
                 node: self,
-                range: self.range(),
                 ops: self.ops(),
                 operands: self.operands(),
             }
@@ -10711,16 +10877,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprCallFields<'a> {
         pub node: crate::ExprCall<'a>,
-        pub range: ruff_text_size::TextRange,
         pub func: crate::Expr<'a>,
         pub arguments: crate::Arguments<'a>,
+    }
+    impl Ranged for ExprCallFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprCall<'a> {
         #[inline]
         pub fn fields(self) -> ExprCallFields<'a> {
             ExprCallFields {
                 node: self,
-                range: self.range(),
                 func: self.func(),
                 arguments: self.arguments(),
             }
@@ -10729,15 +10899,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprFStringFields<'a> {
         pub node: crate::ExprFString<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: crate::flat::FStringValue<'a>,
+    }
+    impl Ranged for ExprFStringFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprFString<'a> {
         #[inline]
         pub fn fields(self) -> ExprFStringFields<'a> {
             ExprFStringFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
             }
         }
@@ -10745,15 +10919,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprTStringFields<'a> {
         pub node: crate::ExprTString<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: crate::flat::TStringValue<'a>,
+    }
+    impl Ranged for ExprTStringFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprTString<'a> {
         #[inline]
         pub fn fields(self) -> ExprTStringFields<'a> {
             ExprTStringFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
             }
         }
@@ -10761,15 +10939,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprStringLiteralFields<'a> {
         pub node: crate::ExprStringLiteral<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: crate::flat::StringValue<'a>,
+    }
+    impl Ranged for ExprStringLiteralFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprStringLiteral<'a> {
         #[inline]
         pub fn fields(self) -> ExprStringLiteralFields<'a> {
             ExprStringLiteralFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
             }
         }
@@ -10777,15 +10959,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprBytesLiteralFields<'a> {
         pub node: crate::ExprBytesLiteral<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: crate::flat::BytesValue<'a>,
+    }
+    impl Ranged for ExprBytesLiteralFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprBytesLiteral<'a> {
         #[inline]
         pub fn fields(self) -> ExprBytesLiteralFields<'a> {
             ExprBytesLiteralFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
             }
         }
@@ -10793,15 +10979,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprNumberLiteralFields<'a> {
         pub node: crate::ExprNumberLiteral<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: &'a crate::Number,
+    }
+    impl Ranged for ExprNumberLiteralFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprNumberLiteral<'a> {
         #[inline]
         pub fn fields(self) -> ExprNumberLiteralFields<'a> {
             ExprNumberLiteralFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
             }
         }
@@ -10809,15 +10999,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprBooleanLiteralFields<'a> {
         pub node: crate::ExprBooleanLiteral<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: bool,
+    }
+    impl Ranged for ExprBooleanLiteralFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprBooleanLiteral<'a> {
         #[inline]
         pub fn fields(self) -> ExprBooleanLiteralFields<'a> {
             ExprBooleanLiteralFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
             }
         }
@@ -10825,45 +11019,53 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprNoneLiteralFields<'a> {
         pub node: crate::ExprNoneLiteral<'a>,
-        pub range: ruff_text_size::TextRange,
+    }
+    impl Ranged for ExprNoneLiteralFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprNoneLiteral<'a> {
         #[inline]
         pub fn fields(self) -> ExprNoneLiteralFields<'a> {
-            ExprNoneLiteralFields {
-                node: self,
-                range: self.range(),
-            }
+            ExprNoneLiteralFields { node: self }
         }
     }
     #[derive(Clone, Copy)]
     pub struct ExprEllipsisLiteralFields<'a> {
         pub node: crate::ExprEllipsisLiteral<'a>,
-        pub range: ruff_text_size::TextRange,
+    }
+    impl Ranged for ExprEllipsisLiteralFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprEllipsisLiteral<'a> {
         #[inline]
         pub fn fields(self) -> ExprEllipsisLiteralFields<'a> {
-            ExprEllipsisLiteralFields {
-                node: self,
-                range: self.range(),
-            }
+            ExprEllipsisLiteralFields { node: self }
         }
     }
     #[derive(Clone, Copy)]
     pub struct ExprAttributeFields<'a> {
         pub node: crate::ExprAttribute<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: crate::Expr<'a>,
         pub attr: crate::Identifier<'a>,
         pub ctx: crate::ExprContext,
+    }
+    impl Ranged for ExprAttributeFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprAttribute<'a> {
         #[inline]
         pub fn fields(self) -> ExprAttributeFields<'a> {
             ExprAttributeFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
                 attr: self.attr(),
                 ctx: self.ctx(),
@@ -10873,17 +11075,21 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprSubscriptFields<'a> {
         pub node: crate::ExprSubscript<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: crate::Expr<'a>,
         pub slice: crate::Expr<'a>,
         pub ctx: crate::ExprContext,
+    }
+    impl Ranged for ExprSubscriptFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprSubscript<'a> {
         #[inline]
         pub fn fields(self) -> ExprSubscriptFields<'a> {
             ExprSubscriptFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
                 slice: self.slice(),
                 ctx: self.ctx(),
@@ -10893,16 +11099,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprStarredFields<'a> {
         pub node: crate::ExprStarred<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: crate::Expr<'a>,
         pub ctx: crate::ExprContext,
+    }
+    impl Ranged for ExprStarredFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprStarred<'a> {
         #[inline]
         pub fn fields(self) -> ExprStarredFields<'a> {
             ExprStarredFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
                 ctx: self.ctx(),
             }
@@ -10911,16 +11121,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprNameFields<'a> {
         pub node: crate::ExprName<'a>,
-        pub range: ruff_text_size::TextRange,
         pub id: &'a crate::name::Name,
         pub ctx: crate::ExprContext,
+    }
+    impl Ranged for ExprNameFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprName<'a> {
         #[inline]
         pub fn fields(self) -> ExprNameFields<'a> {
             ExprNameFields {
                 node: self,
-                range: self.range(),
                 id: self.id(),
                 ctx: self.ctx(),
             }
@@ -10929,16 +11143,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprListFields<'a> {
         pub node: crate::ExprList<'a>,
-        pub range: ruff_text_size::TextRange,
         pub elts: NodeList<'a, crate::kind::Expr>,
         pub ctx: crate::ExprContext,
+    }
+    impl Ranged for ExprListFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprList<'a> {
         #[inline]
         pub fn fields(self) -> ExprListFields<'a> {
             ExprListFields {
                 node: self,
-                range: self.range(),
                 elts: self.elts(),
                 ctx: self.ctx(),
             }
@@ -10947,17 +11165,21 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprTupleFields<'a> {
         pub node: crate::ExprTuple<'a>,
-        pub range: ruff_text_size::TextRange,
         pub elts: NodeList<'a, crate::kind::Expr>,
         pub ctx: crate::ExprContext,
         pub parenthesized: bool,
+    }
+    impl Ranged for ExprTupleFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprTuple<'a> {
         #[inline]
         pub fn fields(self) -> ExprTupleFields<'a> {
             ExprTupleFields {
                 node: self,
-                range: self.range(),
                 elts: self.elts(),
                 ctx: self.ctx(),
                 parenthesized: self.parenthesized(),
@@ -10967,17 +11189,21 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprSliceFields<'a> {
         pub node: crate::ExprSlice<'a>,
-        pub range: ruff_text_size::TextRange,
         pub lower: Option<crate::Expr<'a>>,
         pub upper: Option<crate::Expr<'a>>,
         pub step: Option<crate::Expr<'a>>,
+    }
+    impl Ranged for ExprSliceFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprSlice<'a> {
         #[inline]
         pub fn fields(self) -> ExprSliceFields<'a> {
             ExprSliceFields {
                 node: self,
-                range: self.range(),
                 lower: self.lower(),
                 upper: self.upper(),
                 step: self.step(),
@@ -10987,16 +11213,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExprIpyEscapeCommandFields<'a> {
         pub node: crate::ExprIpyEscapeCommand<'a>,
-        pub range: ruff_text_size::TextRange,
         pub kind: crate::IpyEscapeKind,
         pub value: &'a str,
+    }
+    impl Ranged for ExprIpyEscapeCommandFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExprIpyEscapeCommand<'a> {
         #[inline]
         pub fn fields(self) -> ExprIpyEscapeCommandFields<'a> {
             ExprIpyEscapeCommandFields {
                 node: self,
-                range: self.range(),
                 kind: self.kind(),
                 value: self.value(),
             }
@@ -11005,17 +11235,21 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ExceptHandlerExceptHandlerFields<'a> {
         pub node: crate::ExceptHandlerExceptHandler<'a>,
-        pub range: ruff_text_size::TextRange,
         pub type_: Option<crate::Expr<'a>>,
         pub name: Option<crate::Identifier<'a>>,
         pub body: NodeList<'a, crate::kind::Stmt>,
+    }
+    impl Ranged for ExceptHandlerExceptHandlerFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ExceptHandlerExceptHandler<'a> {
         #[inline]
         pub fn fields(self) -> ExceptHandlerExceptHandlerFields<'a> {
             ExceptHandlerExceptHandlerFields {
                 node: self,
-                range: self.range(),
                 type_: self.type_(),
                 name: self.name(),
                 body: self.body(),
@@ -11025,18 +11259,22 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct InterpolatedElementFields<'a> {
         pub node: crate::InterpolatedElement<'a>,
-        pub range: ruff_text_size::TextRange,
         pub expression: crate::Expr<'a>,
         pub debug_text: Option<&'a crate::DebugText>,
         pub conversion: crate::ConversionFlag,
         pub format_spec: Option<crate::InterpolatedStringFormatSpec<'a>>,
+    }
+    impl Ranged for InterpolatedElementFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::InterpolatedElement<'a> {
         #[inline]
         pub fn fields(self) -> InterpolatedElementFields<'a> {
             InterpolatedElementFields {
                 node: self,
-                range: self.range(),
                 expression: self.expression(),
                 debug_text: self.debug_text(),
                 conversion: self.conversion(),
@@ -11047,15 +11285,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct InterpolatedStringLiteralElementFields<'a> {
         pub node: crate::InterpolatedStringLiteralElement<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: &'a str,
+    }
+    impl Ranged for InterpolatedStringLiteralElementFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::InterpolatedStringLiteralElement<'a> {
         #[inline]
         pub fn fields(self) -> InterpolatedStringLiteralElementFields<'a> {
             InterpolatedStringLiteralElementFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
             }
         }
@@ -11063,15 +11305,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct PatternMatchValueFields<'a> {
         pub node: crate::PatternMatchValue<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: crate::Expr<'a>,
+    }
+    impl Ranged for PatternMatchValueFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::PatternMatchValue<'a> {
         #[inline]
         pub fn fields(self) -> PatternMatchValueFields<'a> {
             PatternMatchValueFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
             }
         }
@@ -11079,15 +11325,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct PatternMatchSingletonFields<'a> {
         pub node: crate::PatternMatchSingleton<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: crate::Singleton,
+    }
+    impl Ranged for PatternMatchSingletonFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::PatternMatchSingleton<'a> {
         #[inline]
         pub fn fields(self) -> PatternMatchSingletonFields<'a> {
             PatternMatchSingletonFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
             }
         }
@@ -11095,15 +11345,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct PatternMatchSequenceFields<'a> {
         pub node: crate::PatternMatchSequence<'a>,
-        pub range: ruff_text_size::TextRange,
         pub patterns: NodeList<'a, crate::kind::Pattern>,
+    }
+    impl Ranged for PatternMatchSequenceFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::PatternMatchSequence<'a> {
         #[inline]
         pub fn fields(self) -> PatternMatchSequenceFields<'a> {
             PatternMatchSequenceFields {
                 node: self,
-                range: self.range(),
                 patterns: self.patterns(),
             }
         }
@@ -11111,15 +11365,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct PatternMatchMappingFields<'a> {
         pub node: crate::PatternMatchMapping<'a>,
-        pub range: ruff_text_size::TextRange,
         pub items: crate::flat::MappingPatternItems<'a>,
+    }
+    impl Ranged for PatternMatchMappingFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::PatternMatchMapping<'a> {
         #[inline]
         pub fn fields(self) -> PatternMatchMappingFields<'a> {
             PatternMatchMappingFields {
                 node: self,
-                range: self.range(),
                 items: self.items(),
             }
         }
@@ -11127,16 +11385,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct PatternMatchClassFields<'a> {
         pub node: crate::PatternMatchClass<'a>,
-        pub range: ruff_text_size::TextRange,
         pub cls: crate::Expr<'a>,
         pub arguments: crate::PatternArguments<'a>,
+    }
+    impl Ranged for PatternMatchClassFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::PatternMatchClass<'a> {
         #[inline]
         pub fn fields(self) -> PatternMatchClassFields<'a> {
             PatternMatchClassFields {
                 node: self,
-                range: self.range(),
                 cls: self.cls(),
                 arguments: self.arguments(),
             }
@@ -11145,15 +11407,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct PatternMatchStarFields<'a> {
         pub node: crate::PatternMatchStar<'a>,
-        pub range: ruff_text_size::TextRange,
         pub name: Option<crate::Identifier<'a>>,
+    }
+    impl Ranged for PatternMatchStarFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::PatternMatchStar<'a> {
         #[inline]
         pub fn fields(self) -> PatternMatchStarFields<'a> {
             PatternMatchStarFields {
                 node: self,
-                range: self.range(),
                 name: self.name(),
             }
         }
@@ -11161,16 +11427,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct PatternMatchAsFields<'a> {
         pub node: crate::PatternMatchAs<'a>,
-        pub range: ruff_text_size::TextRange,
         pub pattern: Option<crate::Pattern<'a>>,
         pub name: Option<crate::Identifier<'a>>,
+    }
+    impl Ranged for PatternMatchAsFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::PatternMatchAs<'a> {
         #[inline]
         pub fn fields(self) -> PatternMatchAsFields<'a> {
             PatternMatchAsFields {
                 node: self,
-                range: self.range(),
                 pattern: self.pattern(),
                 name: self.name(),
             }
@@ -11179,15 +11449,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct PatternMatchOrFields<'a> {
         pub node: crate::PatternMatchOr<'a>,
-        pub range: ruff_text_size::TextRange,
         pub patterns: NodeList<'a, crate::kind::Pattern>,
+    }
+    impl Ranged for PatternMatchOrFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::PatternMatchOr<'a> {
         #[inline]
         pub fn fields(self) -> PatternMatchOrFields<'a> {
             PatternMatchOrFields {
                 node: self,
-                range: self.range(),
                 patterns: self.patterns(),
             }
         }
@@ -11195,17 +11469,21 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct TypeParamTypeVarFields<'a> {
         pub node: crate::TypeParamTypeVar<'a>,
-        pub range: ruff_text_size::TextRange,
         pub name: crate::Identifier<'a>,
         pub bound: Option<crate::Expr<'a>>,
         pub default: Option<crate::Expr<'a>>,
+    }
+    impl Ranged for TypeParamTypeVarFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::TypeParamTypeVar<'a> {
         #[inline]
         pub fn fields(self) -> TypeParamTypeVarFields<'a> {
             TypeParamTypeVarFields {
                 node: self,
-                range: self.range(),
                 name: self.name(),
                 bound: self.bound(),
                 default: self.default(),
@@ -11215,16 +11493,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct TypeParamTypeVarTupleFields<'a> {
         pub node: crate::TypeParamTypeVarTuple<'a>,
-        pub range: ruff_text_size::TextRange,
         pub name: crate::Identifier<'a>,
         pub default: Option<crate::Expr<'a>>,
+    }
+    impl Ranged for TypeParamTypeVarTupleFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::TypeParamTypeVarTuple<'a> {
         #[inline]
         pub fn fields(self) -> TypeParamTypeVarTupleFields<'a> {
             TypeParamTypeVarTupleFields {
                 node: self,
-                range: self.range(),
                 name: self.name(),
                 default: self.default(),
             }
@@ -11233,16 +11515,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct TypeParamParamSpecFields<'a> {
         pub node: crate::TypeParamParamSpec<'a>,
-        pub range: ruff_text_size::TextRange,
         pub name: crate::Identifier<'a>,
         pub default: Option<crate::Expr<'a>>,
+    }
+    impl Ranged for TypeParamParamSpecFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::TypeParamParamSpec<'a> {
         #[inline]
         pub fn fields(self) -> TypeParamParamSpecFields<'a> {
             TypeParamParamSpecFields {
                 node: self,
-                range: self.range(),
                 name: self.name(),
                 default: self.default(),
             }
@@ -11251,15 +11537,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct InterpolatedStringFormatSpecFields<'a> {
         pub node: crate::InterpolatedStringFormatSpec<'a>,
-        pub range: ruff_text_size::TextRange,
         pub elements: NodeList<'a, crate::kind::InterpolatedStringElement>,
+    }
+    impl Ranged for InterpolatedStringFormatSpecFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::InterpolatedStringFormatSpec<'a> {
         #[inline]
         pub fn fields(self) -> InterpolatedStringFormatSpecFields<'a> {
             InterpolatedStringFormatSpecFields {
                 node: self,
-                range: self.range(),
                 elements: self.elements(),
             }
         }
@@ -11267,15 +11557,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct PatternArgumentsFields<'a> {
         pub node: crate::PatternArguments<'a>,
-        pub range: ruff_text_size::TextRange,
         pub items: List<'a, crate::PatternArgumentId>,
+    }
+    impl Ranged for PatternArgumentsFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::PatternArguments<'a> {
         #[inline]
         pub fn fields(self) -> PatternArgumentsFields<'a> {
             PatternArgumentsFields {
                 node: self,
-                range: self.range(),
                 items: self.items(),
             }
         }
@@ -11283,16 +11577,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct PatternKeywordFields<'a> {
         pub node: crate::PatternKeyword<'a>,
-        pub range: ruff_text_size::TextRange,
         pub attr: crate::Identifier<'a>,
         pub pattern: crate::Pattern<'a>,
+    }
+    impl Ranged for PatternKeywordFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::PatternKeyword<'a> {
         #[inline]
         pub fn fields(self) -> PatternKeywordFields<'a> {
             PatternKeywordFields {
                 node: self,
-                range: self.range(),
                 attr: self.attr(),
                 pattern: self.pattern(),
             }
@@ -11301,18 +11599,22 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ComprehensionFields<'a> {
         pub node: crate::Comprehension<'a>,
-        pub range: ruff_text_size::TextRange,
         pub target: crate::Expr<'a>,
         pub iter: crate::Expr<'a>,
         pub ifs: NodeList<'a, crate::kind::Expr>,
         pub is_async: bool,
+    }
+    impl Ranged for ComprehensionFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::Comprehension<'a> {
         #[inline]
         pub fn fields(self) -> ComprehensionFields<'a> {
             ComprehensionFields {
                 node: self,
-                range: self.range(),
                 target: self.target(),
                 iter: self.iter(),
                 ifs: self.ifs(),
@@ -11323,15 +11625,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ArgumentsFields<'a> {
         pub node: crate::Arguments<'a>,
-        pub range: ruff_text_size::TextRange,
         pub items: List<'a, crate::ArgumentId>,
+    }
+    impl Ranged for ArgumentsFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::Arguments<'a> {
         #[inline]
         pub fn fields(self) -> ArgumentsFields<'a> {
             ArgumentsFields {
                 node: self,
-                range: self.range(),
                 items: self.items(),
             }
         }
@@ -11339,15 +11645,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ParametersFields<'a> {
         pub node: crate::Parameters<'a>,
-        pub range: ruff_text_size::TextRange,
         pub items: crate::flat::ParameterItems<'a>,
+    }
+    impl Ranged for ParametersFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::Parameters<'a> {
         #[inline]
         pub fn fields(self) -> ParametersFields<'a> {
             ParametersFields {
                 node: self,
-                range: self.range(),
                 items: self.items(),
             }
         }
@@ -11355,16 +11665,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ParameterFields<'a> {
         pub node: crate::Parameter<'a>,
-        pub range: ruff_text_size::TextRange,
         pub name: crate::Identifier<'a>,
         pub annotation: Option<crate::Expr<'a>>,
+    }
+    impl Ranged for ParameterFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::Parameter<'a> {
         #[inline]
         pub fn fields(self) -> ParameterFields<'a> {
             ParameterFields {
                 node: self,
-                range: self.range(),
                 name: self.name(),
                 annotation: self.annotation(),
             }
@@ -11373,16 +11687,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ParameterWithDefaultFields<'a> {
         pub node: crate::ParameterWithDefault<'a>,
-        pub range: ruff_text_size::TextRange,
         pub parameter: crate::Parameter<'a>,
         pub default: Option<crate::Expr<'a>>,
+    }
+    impl Ranged for ParameterWithDefaultFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ParameterWithDefault<'a> {
         #[inline]
         pub fn fields(self) -> ParameterWithDefaultFields<'a> {
             ParameterWithDefaultFields {
                 node: self,
-                range: self.range(),
                 parameter: self.parameter(),
                 default: self.default(),
             }
@@ -11391,16 +11709,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct DictItemFields<'a> {
         pub node: crate::DictItem<'a>,
-        pub range: ruff_text_size::TextRange,
         pub key: Option<crate::Expr<'a>>,
         pub value: crate::Expr<'a>,
+    }
+    impl Ranged for DictItemFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::DictItem<'a> {
         #[inline]
         pub fn fields(self) -> DictItemFields<'a> {
             DictItemFields {
                 node: self,
-                range: self.range(),
                 key: self.key(),
                 value: self.value(),
             }
@@ -11409,16 +11731,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct KeywordFields<'a> {
         pub node: crate::Keyword<'a>,
-        pub range: ruff_text_size::TextRange,
         pub arg: Option<crate::Identifier<'a>>,
         pub value: crate::Expr<'a>,
+    }
+    impl Ranged for KeywordFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::Keyword<'a> {
         #[inline]
         pub fn fields(self) -> KeywordFields<'a> {
             KeywordFields {
                 node: self,
-                range: self.range(),
                 arg: self.arg(),
                 value: self.value(),
             }
@@ -11427,16 +11753,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct AliasFields<'a> {
         pub node: crate::Alias<'a>,
-        pub range: ruff_text_size::TextRange,
         pub name: crate::Identifier<'a>,
         pub asname: Option<crate::Identifier<'a>>,
+    }
+    impl Ranged for AliasFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::Alias<'a> {
         #[inline]
         pub fn fields(self) -> AliasFields<'a> {
             AliasFields {
                 node: self,
-                range: self.range(),
                 name: self.name(),
                 asname: self.asname(),
             }
@@ -11445,16 +11775,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct WithItemFields<'a> {
         pub node: crate::WithItem<'a>,
-        pub range: ruff_text_size::TextRange,
         pub context_expr: crate::Expr<'a>,
         pub optional_vars: Option<crate::Expr<'a>>,
+    }
+    impl Ranged for WithItemFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::WithItem<'a> {
         #[inline]
         pub fn fields(self) -> WithItemFields<'a> {
             WithItemFields {
                 node: self,
-                range: self.range(),
                 context_expr: self.context_expr(),
                 optional_vars: self.optional_vars(),
             }
@@ -11463,17 +11797,21 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct MatchCaseFields<'a> {
         pub node: crate::MatchCase<'a>,
-        pub range: ruff_text_size::TextRange,
         pub pattern: crate::Pattern<'a>,
         pub guard: Option<crate::Expr<'a>>,
         pub body: NodeList<'a, crate::kind::Stmt>,
+    }
+    impl Ranged for MatchCaseFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::MatchCase<'a> {
         #[inline]
         pub fn fields(self) -> MatchCaseFields<'a> {
             MatchCaseFields {
                 node: self,
-                range: self.range(),
                 pattern: self.pattern(),
                 guard: self.guard(),
                 body: self.body(),
@@ -11483,15 +11821,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct DecoratorFields<'a> {
         pub node: crate::Decorator<'a>,
-        pub range: ruff_text_size::TextRange,
         pub expression: crate::Expr<'a>,
+    }
+    impl Ranged for DecoratorFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::Decorator<'a> {
         #[inline]
         pub fn fields(self) -> DecoratorFields<'a> {
             DecoratorFields {
                 node: self,
-                range: self.range(),
                 expression: self.expression(),
             }
         }
@@ -11499,16 +11841,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct ElifElseClauseFields<'a> {
         pub node: crate::ElifElseClause<'a>,
-        pub range: ruff_text_size::TextRange,
         pub test: Option<crate::Expr<'a>>,
         pub body: NodeList<'a, crate::kind::Stmt>,
+    }
+    impl Ranged for ElifElseClauseFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::ElifElseClause<'a> {
         #[inline]
         pub fn fields(self) -> ElifElseClauseFields<'a> {
             ElifElseClauseFields {
                 node: self,
-                range: self.range(),
                 test: self.test(),
                 body: self.body(),
             }
@@ -11517,15 +11863,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct TypeParamsFields<'a> {
         pub node: crate::TypeParams<'a>,
-        pub range: ruff_text_size::TextRange,
         pub type_params: NodeList<'a, crate::kind::TypeParam>,
+    }
+    impl Ranged for TypeParamsFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::TypeParams<'a> {
         #[inline]
         pub fn fields(self) -> TypeParamsFields<'a> {
             TypeParamsFields {
                 node: self,
-                range: self.range(),
                 type_params: self.type_params(),
             }
         }
@@ -11533,16 +11883,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct FStringFields<'a> {
         pub node: crate::FString<'a>,
-        pub range: ruff_text_size::TextRange,
         pub elements: NodeList<'a, crate::kind::InterpolatedStringElement>,
         pub flags: crate::FStringFlags,
+    }
+    impl Ranged for FStringFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::FString<'a> {
         #[inline]
         pub fn fields(self) -> FStringFields<'a> {
             FStringFields {
                 node: self,
-                range: self.range(),
                 elements: self.elements(),
                 flags: self.flags(),
             }
@@ -11551,16 +11905,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct TStringFields<'a> {
         pub node: crate::TString<'a>,
-        pub range: ruff_text_size::TextRange,
         pub elements: NodeList<'a, crate::kind::InterpolatedStringElement>,
         pub flags: crate::TStringFlags,
+    }
+    impl Ranged for TStringFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::TString<'a> {
         #[inline]
         pub fn fields(self) -> TStringFields<'a> {
             TStringFields {
                 node: self,
-                range: self.range(),
                 elements: self.elements(),
                 flags: self.flags(),
             }
@@ -11569,16 +11927,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct StringLiteralFields<'a> {
         pub node: crate::StringLiteral<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: &'a str,
         pub flags: crate::StringLiteralFlags,
+    }
+    impl Ranged for StringLiteralFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::StringLiteral<'a> {
         #[inline]
         pub fn fields(self) -> StringLiteralFields<'a> {
             StringLiteralFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
                 flags: self.flags(),
             }
@@ -11587,16 +11949,20 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct BytesLiteralFields<'a> {
         pub node: crate::BytesLiteral<'a>,
-        pub range: ruff_text_size::TextRange,
         pub value: &'a [u8],
         pub flags: crate::BytesLiteralFlags,
+    }
+    impl Ranged for BytesLiteralFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::BytesLiteral<'a> {
         #[inline]
         pub fn fields(self) -> BytesLiteralFields<'a> {
             BytesLiteralFields {
                 node: self,
-                range: self.range(),
                 value: self.value(),
                 flags: self.flags(),
             }
@@ -11605,15 +11971,19 @@ pub(crate) mod fields {
     #[derive(Clone, Copy)]
     pub struct IdentifierFields<'a> {
         pub node: crate::Identifier<'a>,
-        pub range: ruff_text_size::TextRange,
         pub id: &'a crate::name::Name,
+    }
+    impl Ranged for IdentifierFields<'_> {
+        #[inline]
+        fn range(&self) -> ruff_text_size::TextRange {
+            self.node.range()
+        }
     }
     impl<'a> crate::Identifier<'a> {
         #[inline]
         pub fn fields(self) -> IdentifierFields<'a> {
             IdentifierFields {
                 node: self,
-                range: self.range(),
                 id: self.id(),
             }
         }

@@ -271,13 +271,11 @@ impl<'a> Visitor<'a> for GroupNameFinder<'a> {
             ast::ExprFields::ListComp(ast::ExprListCompFields {
                 elt,
                 generators,
-                range: _,
                 node: _,
             })
             | ast::ExprFields::SetComp(ast::ExprSetCompFields {
                 elt,
                 generators,
-                range: _,
                 node: _,
             }) => {
                 for comprehension in generators {
@@ -293,7 +291,6 @@ impl<'a> Visitor<'a> for GroupNameFinder<'a> {
                 key,
                 value,
                 generators,
-                range: _,
                 node: _,
             }) => {
                 for comprehension in generators {

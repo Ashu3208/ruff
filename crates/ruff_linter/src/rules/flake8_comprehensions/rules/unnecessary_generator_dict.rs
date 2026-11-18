@@ -1,6 +1,7 @@
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::ExprCallFields;
 use ruff_python_ast::ExprKind;
+use ruff_text_size::Ranged;
 
 use crate::checkers::ast::Checker;
 use crate::codes::Category;
@@ -64,7 +65,7 @@ pub(crate) fn unnecessary_generator_dict(checker: &Checker, call: &ExprCallField
     if tuple.iter().any(ruff_python_ast::Expr::is_starred_expr) {
         return;
     }
-    let mut diagnostic = checker.report_diagnostic(UnnecessaryGeneratorDict, call.range);
+    let mut diagnostic = checker.report_diagnostic(UnnecessaryGeneratorDict, call.range());
     diagnostic.try_set_fix(|| {
         fixes::fix_unnecessary_generator_dict(call.node.into(), checker).map(Fix::unsafe_edit)
     });

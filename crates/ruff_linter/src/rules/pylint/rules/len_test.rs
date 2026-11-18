@@ -111,14 +111,14 @@ pub(crate) fn len_test(checker: &Checker, call: &ast::ExprCallFields<'_>) {
             LenTest {
                 expression: SourceCodeSnippet::new(replacement.clone()),
             },
-            call.range,
+            call.range(),
         )
         .set_fix(Fix::applicable_edit(
             Edit::range_replacement(
-                edits::pad(replacement, call.range, checker.locator()),
-                call.range,
+                edits::pad(replacement, call.range(), checker.locator()),
+                call.range(),
             ),
-            if checker.comment_ranges().intersects(call.range) {
+            if checker.comment_ranges().intersects(call.range()) {
                 Applicability::Unsafe
             } else {
                 Applicability::Safe

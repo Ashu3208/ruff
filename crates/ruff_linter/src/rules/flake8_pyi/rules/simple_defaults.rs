@@ -407,7 +407,6 @@ fn is_valid_pep_604_union(annotation: Expr<'_>) -> bool {
         left,
         op: Operator::BitOr,
         right,
-        range: _,
         node: _,
     }) = annotation.fields()
     else {

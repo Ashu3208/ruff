@@ -150,6 +150,6 @@ pub(crate) fn assert_raises_exception_call(checker: &Checker, call: &ast::ExprCa
     }
 
     if let Some(exception) = detect_blind_exception(semantic, func, arguments) {
-        checker.report_diagnostic(AssertRaisesException { exception }, call.range);
+        checker.report_diagnostic(AssertRaisesException { exception }, call.range());
     }
 }

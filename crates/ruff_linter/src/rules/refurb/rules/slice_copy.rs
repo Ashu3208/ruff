@@ -2,6 +2,7 @@ use ruff_diagnostics::Applicability;
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::name::Name;
 use ruff_python_ast::{self as ast, ExprSubscript};
+use ruff_text_size::Ranged;
 
 use ruff_python_semantic::analyze::typing::is_list;
 use ruff_python_semantic::{Binding, SemanticModel};
@@ -67,17 +68,21 @@ pub(crate) fn slice_copy(checker: &Checker, subscript: &ast::ExprSubscriptFields
     let Some(name) = match_list_full_slice(subscript.node, checker.semantic()) else {
         return;
     };
-    let mut diagnostic = checker.report_diagnostic(SliceCopy, subscript.range);
+    let mut diagnostic = checker.report_diagnostic(SliceCopy, subscript.range());
     let replacement = generate_method_call(name.as_str(), "copy", checker.generator());
 
-    let applicability = if checker.comment_ranges().intersects(subscript.range) {
+    let applicability = if checker.comment_ranges().intersects(subscript.range()) {
         Applicability::Unsafe
     } else {
         Applicability::Safe
     };
 
     diagnostic.set_fix(Fix::applicable_edit(
-        Edit::replacement(replacement, subscript.range.start(), subscript.range.end()),
+        Edit::replacement(
+            replacement,
+            subscript.range().start(),
+            subscript.range().end(),
+        ),
         applicability,
     ));
 }
@@ -94,7 +99,6 @@ fn match_list_full_slice<'a>(
             lower: None,
             upper: None,
             step: None,
-            range: _,
             node: _,
         })
     ) {

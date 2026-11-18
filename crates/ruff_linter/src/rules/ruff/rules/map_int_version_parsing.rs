@@ -1,6 +1,7 @@
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::{self as ast, Expr, ExprKind};
 use ruff_python_semantic::SemanticModel;
+use ruff_text_size::Ranged;
 
 use crate::Violation;
 use crate::checkers::ast::Checker;
@@ -54,7 +55,7 @@ pub(crate) fn map_int_version_parsing(checker: &Checker, call: &ast::ExprCallFie
     };
 
     if is_dunder_version_split_dot(second) && semantic.match_builtin_expr(first, "int") {
-        checker.report_diagnostic(MapIntVersionParsing, call.range);
+        checker.report_diagnostic(MapIntVersionParsing, call.range());
     }
 }
 
@@ -82,11 +83,8 @@ fn is_dunder_version_split_dot(expr: Expr<'_>) -> bool {
         return false;
     }
 
-    let Some(ast::ExprFields::StringLiteral(ast::ExprStringLiteralFields {
-        value,
-        range: _,
-        node: _,
-    })) = arguments.find_argument_value("sep", 0).map(Expr::fields)
+    let Some(ast::ExprFields::StringLiteral(ast::ExprStringLiteralFields { value, node: _ })) =
+        arguments.find_argument_value("sep", 0).map(Expr::fields)
     else {
         return false;
     };

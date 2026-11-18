@@ -58,13 +58,13 @@ pub(crate) fn unnecessary_list_comprehension_set(
     if !argument.is_list_comp_expr() {
         return;
     }
-    let mut diagnostic = checker.report_diagnostic(UnnecessaryListComprehensionSet, call.range);
+    let mut diagnostic = checker.report_diagnostic(UnnecessaryListComprehensionSet, call.range());
     let one = TextSize::from(1);
 
     // Replace `set(` with `{`.
     let call_start = Edit::replacement(
-        pad_start("{", call.range, checker.locator(), checker.semantic()),
-        call.range.start(),
+        pad_start("{", call.range(), checker.locator(), checker.semantic()),
+        call.range().start(),
         call.arguments.start() + one,
     );
 
@@ -72,16 +72,16 @@ pub(crate) fn unnecessary_list_comprehension_set(
     // Place `}` at argument's end or at trailing comma if present
     let after_arg_tokens = checker
         .tokens()
-        .in_range(TextRange::new(argument.end(), call.range.end()));
+        .in_range(TextRange::new(argument.end(), call.range().end()));
     let right_brace_loc = after_arg_tokens
         .iter()
         .find(|token| token.kind() == TokenKind::Comma)
         .map_or(call.arguments.end() - one, |comma| comma.end() - one);
 
     let call_end = Edit::replacement(
-        pad_end("}", call.range, checker.locator(), checker.semantic()),
+        pad_end("}", call.range(), checker.locator(), checker.semantic()),
         right_brace_loc,
-        call.range.end(),
+        call.range().end(),
     );
 
     // If the list comprehension is parenthesized, remove the parentheses in addition to

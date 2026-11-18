@@ -90,7 +90,7 @@ pub(crate) fn unnecessary_collection_call(
 
     let mut diagnostic = checker.report_diagnostic(
         UnnecessaryCollectionCall { kind: collection },
-        call_fields.range,
+        call_fields.range(),
     );
 
     // Convert `dict()` to `{}`.
@@ -101,7 +101,7 @@ pub(crate) fn unnecessary_collection_call(
                 match collection {
                     Collection::Dict => pad_start(
                         "{",
-                        call_fields.range,
+                        call_fields.range(),
                         checker.locator(),
                         checker.semantic(),
                     ),
@@ -117,7 +117,7 @@ pub(crate) fn unnecessary_collection_call(
                 match collection {
                     Collection::Dict => pad_end(
                         "}",
-                        call_fields.range,
+                        call_fields.range(),
                         checker.locator(),
                         checker.semantic(),
                     ),

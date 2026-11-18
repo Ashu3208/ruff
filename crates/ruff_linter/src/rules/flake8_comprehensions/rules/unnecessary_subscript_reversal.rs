@@ -1,5 +1,6 @@
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::{self as ast, ExprKind, UnaryOp};
+use ruff_text_size::Ranged;
 
 use crate::Violation;
 use crate::checkers::ast::Checker;
@@ -64,7 +65,6 @@ pub(crate) fn unnecessary_subscript_reversal(checker: &Checker, call: &ast::Expr
     let ast::ExprFields::UnaryOp(ast::ExprUnaryOpFields {
         op: UnaryOp::USub,
         operand,
-        range: _,
         node: _,
     }) = step.fields()
     else {
@@ -86,6 +86,6 @@ pub(crate) fn unnecessary_subscript_reversal(checker: &Checker, call: &ast::Expr
         UnnecessarySubscriptReversal {
             func: function_name.to_string(),
         },
-        call.range,
+        call.range(),
     );
 }

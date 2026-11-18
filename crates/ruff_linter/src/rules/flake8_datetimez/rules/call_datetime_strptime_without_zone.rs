@@ -2,6 +2,7 @@ use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::name::QualifiedName;
 use ruff_python_ast::{self as ast, Expr, ExprKind, FStringPartView, Keyword};
 use ruff_python_semantic::Modules;
+use ruff_text_size::Ranged;
 
 use crate::Violation;
 use crate::checkers::ast::Checker;
@@ -146,7 +147,7 @@ pub(crate) fn call_datetime_strptime_without_zone(
         semantic.current_expression_grandparent(),
         semantic.current_expression_parent(),
     ) {
-        checker.report_diagnostic(CallDatetimeStrptimeWithoutZone(antipattern), call.range);
+        checker.report_diagnostic(CallDatetimeStrptimeWithoutZone(antipattern), call.range());
     }
 }
 

@@ -2,6 +2,7 @@ use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::ExprCallFields;
 use ruff_python_ast::{ExprKind, PythonVersion};
 use ruff_python_semantic::analyze::type_inference::{NumberLike, PythonType, ResolvedPythonType};
+use ruff_text_size::Ranged;
 
 use crate::checkers::ast::Checker;
 use crate::codes::Category;
@@ -183,10 +184,10 @@ pub(crate) fn bit_count(checker: &Checker, call: &ExprCallFields<'_>) {
             existing: SourceCodeSnippet::from_str(literal_text),
             replacement: SourceCodeSnippet::new(replacement.clone()),
         },
-        call.range,
+        call.range(),
     );
     diagnostic.set_fix(Fix::applicable_edit(
-        Edit::range_replacement(replacement, call.range),
+        Edit::range_replacement(replacement, call.range()),
         applicability,
     ));
 }

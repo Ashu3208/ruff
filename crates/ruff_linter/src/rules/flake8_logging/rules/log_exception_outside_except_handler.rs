@@ -91,7 +91,7 @@ impl Violation for LogExceptionOutsideExceptHandler {
 pub(crate) fn log_exception_outside_except_handler(checker: &Checker, call: &ExprCallFields<'_>) {
     let semantic = checker.semantic();
 
-    if !outside_handlers(call.range.start(), semantic) {
+    if !outside_handlers(call.range().start(), semantic) {
         return;
     }
 
@@ -125,7 +125,7 @@ pub(crate) fn log_exception_outside_except_handler(checker: &Checker, call: &Exp
         _ => return,
     };
 
-    let mut diagnostic = checker.report_diagnostic(LogExceptionOutsideExceptHandler, call.range);
+    let mut diagnostic = checker.report_diagnostic(LogExceptionOutsideExceptHandler, call.range());
 
     if let Some(fix) = fix {
         diagnostic.set_fix(fix);

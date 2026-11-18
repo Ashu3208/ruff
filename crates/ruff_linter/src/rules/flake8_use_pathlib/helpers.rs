@@ -68,7 +68,7 @@ pub(crate) fn check_os_pathlib_single_arg_calls(
     };
 
     let arg_code = checker.locator().slice(arg.range());
-    let range = call.range;
+    let range = call.range();
 
     let mut diagnostic = checker.report_diagnostic(violation, call.func.range());
 
@@ -79,7 +79,7 @@ pub(crate) fn check_os_pathlib_single_arg_calls(
     diagnostic.try_set_fix(|| {
         let (import_edit, binding) = checker.importer().get_or_import_symbol(
             &ImportRequest::import("pathlib", "Path"),
-            call.range.start(),
+            call.range().start(),
             checker.semantic(),
         )?;
 

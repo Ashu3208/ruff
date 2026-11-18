@@ -64,7 +64,6 @@ impl FormatNodeRule<ruff_python_ast::kind::StmtTry> for FormatStmtTry {
             orelse,
             finalbody,
             is_star,
-            range: _,
             node: _,
         } = item.fields();
 

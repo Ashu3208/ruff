@@ -1,5 +1,6 @@
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::ExprCallFields;
+use ruff_text_size::Ranged;
 
 use crate::checkers::ast::Checker;
 use crate::codes::Category;
@@ -68,7 +69,7 @@ pub(crate) fn map_without_explicit_strict(checker: &Checker, call: &ExprCallFiel
         && !any_infinite_iterables(call.arguments.args().iter().skip(1), semantic)
     {
         checker
-            .report_diagnostic(MapWithoutExplicitStrict, call.range)
+            .report_diagnostic(MapWithoutExplicitStrict, call.range())
             .set_fix(Fix::applicable_edit(
                 add_argument("strict=False", call.arguments, checker.tokens()),
                 Applicability::Unsafe,

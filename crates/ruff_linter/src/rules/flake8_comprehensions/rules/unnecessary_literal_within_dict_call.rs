@@ -76,7 +76,7 @@ pub(crate) fn unnecessary_literal_within_dict_call(
         UnnecessaryLiteralWithinDictCall {
             kind: argument_kind,
         },
-        call_fields.range,
+        call_fields.range(),
     );
 
     // Convert `dict({"a": 1})` to `{"a": 1}`

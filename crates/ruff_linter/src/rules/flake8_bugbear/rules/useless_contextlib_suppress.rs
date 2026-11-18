@@ -1,5 +1,6 @@
 use ruff_python_ast::ExprCallFields;
 use ruff_python_ast::name::QualifiedName;
+use ruff_text_size::Ranged;
 
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 
@@ -59,6 +60,6 @@ pub(crate) fn useless_contextlib_suppress(
     if call.arguments.args().is_empty()
         && matches!(qualified_name.segments(), ["contextlib", "suppress"])
     {
-        checker.report_diagnostic(UselessContextlibSuppress, call.range);
+        checker.report_diagnostic(UselessContextlibSuppress, call.range());
     }
 }

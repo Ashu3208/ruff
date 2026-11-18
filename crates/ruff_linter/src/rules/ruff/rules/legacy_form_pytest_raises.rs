@@ -153,7 +153,7 @@ pub(crate) fn legacy_raises_warns_deprecated_call(
     }
 
     let mut diagnostic =
-        checker.report_diagnostic(LegacyFormPytestRaises { context_type }, call.range);
+        checker.report_diagnostic(LegacyFormPytestRaises { context_type }, call.range());
 
     let stmt = semantic.current_statement();
     if has_leading_content(stmt.start(), checker.source())

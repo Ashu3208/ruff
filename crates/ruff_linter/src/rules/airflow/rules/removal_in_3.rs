@@ -439,15 +439,13 @@ fn check_context_key_usage_in_call(checker: &Checker, call_expr: ExprCall<'_>) {
         return;
     }
 
-    let Some(ast::ExprFields::StringLiteral(ast::ExprStringLiteralFields {
-        value: key,
-        range,
-        node: _,
-    })) = call_expr.arguments().find_positional(0).map(Expr::fields)
+    let Some(ast::ExprFields::StringLiteral(ast::ExprStringLiteralFields { value: key, node })) =
+        call_expr.arguments().find_positional(0).map(Expr::fields)
     else {
         return;
     };
 
+    let range = node.range();
     if check_deprecated_context_key_value_access(checker, value, range) {
         return;
     }

@@ -105,7 +105,7 @@ pub(crate) fn modified_iterating_set(checker: &Checker, for_stmt: &ast::StmtForF
             ModifiedIteratingSet {
                 name: name.id().clone(),
             },
-            for_stmt.range,
+            for_stmt.range(),
         );
         diagnostic.set_fix(Fix::unsafe_edit(Edit::range_replacement(
             format!("{}.copy()", checker.locator().slice(name)),

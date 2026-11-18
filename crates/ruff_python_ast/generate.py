@@ -771,14 +771,17 @@ def generate_flat_patterns(ast: Ast, nodes: set[str]) -> list[str]:
         ty = node.name
         fields = [field_codec(field, nodes) for field in node.fields]
         out.append(f"#[derive(Clone, Copy)] pub struct {ty}Fields<'a> {{")
-        out.append(f"pub node: crate::{ty}<'a>, pub range: ruff_text_size::TextRange,")
+        out.append(f"pub node: crate::{ty}<'a>,")
         for field in fields:
             out.append(f"pub {field.name}: {field.result},")
         out.append("}")
         out.append(
+            f"impl Ranged for {ty}Fields<'_> {{ #[inline] fn range(&self) -> ruff_text_size::TextRange {{ self.node.range() }} }}"
+        )
+        out.append(
             f"impl<'a> crate::{ty}<'a> {{ #[inline] pub fn fields(self) -> {ty}Fields<'a> {{"
         )
-        out.append(f"{ty}Fields {{ node: self, range: self.range(),")
+        out.append(f"{ty}Fields {{ node: self,")
         for field in fields:
             out.append(f"{field.name}: self.{field.name}(),")
         out.append("} } }")

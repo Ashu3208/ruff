@@ -4,6 +4,7 @@ use ruff_python_ast::helpers::contains_effect;
 use ruff_python_ast::{self as ast, Builder, CmpOp, Expr, ExprKind};
 use ruff_python_codegen::Generator;
 use ruff_python_semantic::analyze::typing::is_set;
+use ruff_text_size::Ranged;
 
 use crate::checkers::ast::Checker;
 use crate::codes::Category;
@@ -117,12 +118,12 @@ pub(crate) fn check_and_remove_from_set(checker: &Checker, if_stmt: &ast::StmtIf
             element: SourceCodeSnippet::from_str(checker.locator().slice(check_element)),
             set: check_set.id().to_string(),
         },
-        if_stmt.range,
+        if_stmt.range(),
     );
     diagnostic.set_fix(Fix::unsafe_edit(Edit::replacement(
         make_suggestion(check_set, check_element, checker.generator()),
-        if_stmt.range.start(),
-        if_stmt.range.end(),
+        if_stmt.range().start(),
+        if_stmt.range().end(),
     )));
 }
 

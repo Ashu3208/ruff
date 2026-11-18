@@ -1,6 +1,7 @@
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::{ExprCallFields, ExprKind, OperatorPrecedence, StmtKind};
 use ruff_python_semantic::SemanticModel;
+use ruff_text_size::Ranged;
 
 use crate::checkers::ast::Checker;
 use crate::codes::Category;
@@ -210,7 +211,7 @@ pub(crate) fn unnecessary_dunder_call(checker: &Checker, call: &ExprCallFields<'
             method: attr.to_string(),
             replacement: title,
         },
-        call.range,
+        call.range(),
     );
 
     if let Some((mut fixed, precedence)) = fixed {
@@ -239,8 +240,8 @@ pub(crate) fn unnecessary_dunder_call(checker: &Checker, call: &ExprCallFields<'
         }
 
         diagnostic.set_fix(Fix::unsafe_edit(Edit::range_replacement(
-            edits::pad(fixed, call.range, checker.locator()),
-            call.range,
+            edits::pad(fixed, call.range(), checker.locator()),
+            call.range(),
         )));
     }
 }

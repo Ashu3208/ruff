@@ -37,7 +37,6 @@ impl FormatNodeRule<ruff_python_ast::kind::StmtFor> for FormatStmtFor {
             iter,
             body,
             orelse,
-            range: _,
             node: _,
         } = item.fields();
 

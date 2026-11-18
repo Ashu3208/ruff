@@ -4,6 +4,7 @@ use ruff_python_ast::helpers::Truthiness;
 use ruff_python_ast::{Arguments, ExprKind};
 use ruff_python_semantic::analyze::logging;
 use ruff_python_stdlib::logging::LoggingLevel;
+use ruff_text_size::Ranged;
 
 use crate::Violation;
 use crate::checkers::ast::Checker;
@@ -82,7 +83,7 @@ pub(crate) fn exception_without_exc_info(checker: &Checker, call: &ExprCallField
     }
 
     if exc_info_arg_is_falsey(call.arguments, checker) {
-        checker.report_diagnostic(ExceptionWithoutExcInfo, call.range);
+        checker.report_diagnostic(ExceptionWithoutExcInfo, call.range());
     }
 }
 

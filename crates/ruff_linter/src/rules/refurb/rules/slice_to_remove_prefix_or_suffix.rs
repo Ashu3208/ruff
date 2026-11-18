@@ -125,7 +125,7 @@ pub(crate) fn slice_to_remove_affix_stmt(checker: &Checker, if_stmt: &ast::StmtI
                     affix_kind: kind,
                     stmt_or_expression: StmtOrExpr::Statement,
                 },
-                if_stmt.range,
+                if_stmt.range(),
             );
 
             let replacement = generate_assignment_with_removeaffix(
@@ -134,14 +134,14 @@ pub(crate) fn slice_to_remove_affix_stmt(checker: &Checker, if_stmt: &ast::StmtI
                 checker.locator(),
             );
 
-            let applicability = if checker.comment_ranges().intersects(if_stmt.range) {
+            let applicability = if checker.comment_ranges().intersects(if_stmt.range()) {
                 Applicability::Unsafe
             } else {
                 Applicability::Safe
             };
 
             diagnostic.set_fix(Fix::applicable_edit(
-                Edit::replacement(replacement, if_stmt.range.start(), if_stmt.range.end()),
+                Edit::replacement(replacement, if_stmt.range().start(), if_stmt.range().end()),
                 applicability,
             ));
         }
@@ -332,11 +332,9 @@ fn affix_matches_slice_bound(data: &RemoveAffixData, semantic: &SemanticModel) -
             AffixKind::StartsWith,
             ast::ExprFields::NumberLiteral(ast::ExprNumberLiteralFields {
                 value: num,
-                range: _,
                 node: _,
             }),
             ast::ExprFields::StringLiteral(ast::ExprStringLiteralFields {
-                range: _,
                 node: _,
                 value: string_val,
             }),
@@ -348,7 +346,6 @@ fn affix_matches_slice_bound(data: &RemoveAffixData, semantic: &SemanticModel) -
         (
             AffixKind::StartsWith,
             ast::ExprFields::Call(ast::ExprCallFields {
-                range: _,
                 node: _,
                 func,
                 arguments,
@@ -368,11 +365,9 @@ fn affix_matches_slice_bound(data: &RemoveAffixData, semantic: &SemanticModel) -
             ast::ExprFields::UnaryOp(ast::ExprUnaryOpFields {
                 op: UnaryOp::USub,
                 operand,
-                range: _,
                 node: _,
             }),
             ast::ExprFields::StringLiteral(ast::ExprStringLiteralFields {
-                range: _,
                 node: _,
                 value: string_val,
             }),
@@ -387,7 +382,6 @@ fn affix_matches_slice_bound(data: &RemoveAffixData, semantic: &SemanticModel) -
             ast::ExprFields::UnaryOp(ast::ExprUnaryOpFields {
                 op: UnaryOp::USub,
                 operand,
-                range: _,
                 node: _,
             }),
             _,

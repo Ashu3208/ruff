@@ -73,7 +73,7 @@ pub(crate) fn os_getcwd(checker: &Checker, call: &ExprCallFields<'_>, segments: 
         return;
     }
 
-    let range = call.range;
+    let range = call.range();
     let mut diagnostic = checker.report_diagnostic(OsGetcwd, call.func.range());
 
     if !call.arguments.is_empty() {
@@ -84,7 +84,7 @@ pub(crate) fn os_getcwd(checker: &Checker, call: &ExprCallFields<'_>, segments: 
         diagnostic.try_set_fix(|| {
             let (import_edit, binding) = checker.importer().get_or_import_symbol(
                 &ImportRequest::import("pathlib", "Path"),
-                call.range.start(),
+                call.range().start(),
                 checker.semantic(),
             )?;
 

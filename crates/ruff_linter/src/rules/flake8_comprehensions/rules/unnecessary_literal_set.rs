@@ -65,7 +65,7 @@ pub(crate) fn unnecessary_literal_set(checker: &Checker, call_fields: &ast::Expr
     }
 
     let mut diagnostic =
-        checker.report_diagnostic(UnnecessaryLiteralSet { kind }, call_fields.range);
+        checker.report_diagnostic(UnnecessaryLiteralSet { kind }, call_fields.range());
 
     // Convert `set((1, 2))` to `{1, 2}`.
     diagnostic.set_fix({
@@ -79,7 +79,7 @@ pub(crate) fn unnecessary_literal_set(checker: &Checker, call_fields: &ast::Expr
             // If the list or tuple is empty, replace the entire call with `set()`.
             args if args.is_empty() => Fix::unsafe_edit(Edit::range_replacement(
                 "set()".to_string(),
-                call_fields.range,
+                call_fields.range(),
             )),
             // If it's a single-element tuple (with no whitespace around it), remove the trailing
             // comma.
@@ -93,7 +93,7 @@ pub(crate) fn unnecessary_literal_set(checker: &Checker, call_fields: &ast::Expr
                 let call_start = Edit::replacement(
                     pad_start(
                         "{",
-                        call_fields.range,
+                        call_fields.range(),
                         checker.locator(),
                         checker.semantic(),
                     ),
@@ -105,7 +105,7 @@ pub(crate) fn unnecessary_literal_set(checker: &Checker, call_fields: &ast::Expr
                 let call_end = Edit::replacement(
                     pad_end(
                         "}",
-                        call_fields.range,
+                        call_fields.range(),
                         checker.locator(),
                         checker.semantic(),
                     ),
@@ -120,7 +120,7 @@ pub(crate) fn unnecessary_literal_set(checker: &Checker, call_fields: &ast::Expr
                 let call_start = Edit::replacement(
                     pad_start(
                         "{",
-                        call_fields.range,
+                        call_fields.range(),
                         checker.locator(),
                         checker.semantic(),
                     ),
@@ -132,7 +132,7 @@ pub(crate) fn unnecessary_literal_set(checker: &Checker, call_fields: &ast::Expr
                 let call_end = Edit::replacement(
                     pad_end(
                         "}",
-                        call_fields.range,
+                        call_fields.range(),
                         checker.locator(),
                         checker.semantic(),
                     ),

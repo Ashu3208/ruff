@@ -8,6 +8,7 @@ use crate::{FixAvailability, Violation};
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::{self as ast, Expr};
 use ruff_python_semantic::Modules;
+use ruff_text_size::Ranged;
 use ruff_text_size::TextRange;
 
 /// ## What it does
@@ -85,9 +86,8 @@ pub(crate) fn airflow_3_1_moved_expr(checker: &Checker, &expr: &Expr<'_>) {
     }
 
     match expr.fields() {
-        ast::ExprFields::Attribute(ast::ExprAttributeFields { range, .. })
-        | ast::ExprFields::Name(ast::ExprNameFields { range, .. }) => {
-            check_name(checker, expr, range);
+        ast::ExprFields::Attribute(_) | ast::ExprFields::Name(_) => {
+            check_name(checker, expr, expr.range());
         }
         _ => {}
     }

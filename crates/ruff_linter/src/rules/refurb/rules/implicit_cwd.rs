@@ -1,6 +1,7 @@
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::ExprCallFields;
 use ruff_python_ast::ExprKind;
+use ruff_text_size::Ranged;
 
 use crate::codes::Category;
 use crate::{Edit, Fix, FixAvailability, Violation};
@@ -95,16 +96,16 @@ pub(crate) fn no_implicit_cwd(checker: &Checker, call: &ExprCallFields<'_>) {
         return;
     }
 
-    let mut diagnostic = checker.report_diagnostic(ImplicitCwd, call.range);
+    let mut diagnostic = checker.report_diagnostic(ImplicitCwd, call.range());
 
     diagnostic.try_set_fix(|| {
         let (import_edit, binding) = checker.importer().get_or_import_symbol(
             &ImportRequest::import("pathlib", "Path"),
-            call.range.start(),
+            call.range().start(),
             checker.semantic(),
         )?;
         Ok(Fix::unsafe_edits(
-            Edit::range_replacement(format!("{binding}.cwd()"), call.range),
+            Edit::range_replacement(format!("{binding}.cwd()"), call.range()),
             [import_edit],
         ))
     });

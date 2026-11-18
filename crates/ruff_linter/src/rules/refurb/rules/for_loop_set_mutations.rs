@@ -2,6 +2,7 @@ use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::StmtForFields;
 use ruff_python_ast::{ExprKind, StmtKind};
 use ruff_python_semantic::analyze::typing;
+use ruff_text_size::Ranged;
 
 use crate::checkers::ast::Checker;
 use crate::codes::Category;
@@ -135,13 +136,13 @@ pub(crate) fn for_loop_set_mutations(checker: &Checker, for_stmt_fields: &StmtFo
         }
     };
 
-    let applicability = if checker.comment_ranges().intersects(for_stmt_fields.range) {
+    let applicability = if checker.comment_ranges().intersects(for_stmt_fields.range()) {
         Applicability::Unsafe
     } else {
         Applicability::Safe
     };
     let fix = Fix::applicable_edit(
-        Edit::range_replacement(content, for_stmt_fields.range),
+        Edit::range_replacement(content, for_stmt_fields.range()),
         applicability,
     );
 
@@ -151,7 +152,7 @@ pub(crate) fn for_loop_set_mutations(checker: &Checker, for_stmt_fields: &StmtFo
                 method_name,
                 batch_method_name,
             },
-            for_stmt_fields.range,
+            for_stmt_fields.range(),
         )
         .set_fix(fix);
 }

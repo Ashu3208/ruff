@@ -3,6 +3,7 @@ use ruff_python_ast::comparable::ComparableExpr;
 use ruff_python_ast::helpers::contains_effect;
 use ruff_python_ast::{self as ast, BoolOp, BuildId, Builder, ExprKind, build};
 use ruff_python_semantic::analyze::typing::{is_sys_version_block, is_type_checking_block};
+use ruff_text_size::Ranged;
 use ruff_text_size::TextRange;
 
 use crate::checkers::ast::Checker;
@@ -253,7 +254,7 @@ pub(crate) fn if_else_block_instead_of_if_exp(
             contents: contents.clone(),
             kind: assignment_kind,
         },
-        stmt_if_fields.range,
+        stmt_if_fields.range(),
     );
     if !checker
         .comment_ranges()
@@ -261,7 +262,7 @@ pub(crate) fn if_else_block_instead_of_if_exp(
     {
         diagnostic.set_fix(Fix::unsafe_edit(Edit::range_replacement(
             contents,
-            stmt_if_fields.range,
+            stmt_if_fields.range(),
         )));
     }
 }

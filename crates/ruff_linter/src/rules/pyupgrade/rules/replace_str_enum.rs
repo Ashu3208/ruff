@@ -146,7 +146,7 @@ pub(crate) fn replace_str_enum(checker: &Checker, class_def: &ast::StmtClassDefF
         diagnostic.try_set_fix(|| {
             let (import_edit, binding) = checker.importer().get_or_import_symbol(
                 &ImportRequest::import("enum", "StrEnum"),
-                class_def.range.start(),
+                class_def.range().start(),
                 checker.semantic(),
             )?;
             Ok(Fix::unsafe_edits(

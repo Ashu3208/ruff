@@ -163,10 +163,10 @@ pub(crate) fn if_stmt_min_max(checker: &Checker, stmt_if: &ast::StmtIfFields<'_>
             min_max,
             replacement: SourceCodeSnippet::from_str(replacement.as_str()),
         },
-        stmt_if.range,
+        stmt_if.range(),
     );
 
-    let range_replacement = stmt_if.range;
+    let range_replacement = stmt_if.range();
     let applicability = if checker.comment_ranges().intersects(range_replacement) {
         Applicability::Unsafe
     } else {

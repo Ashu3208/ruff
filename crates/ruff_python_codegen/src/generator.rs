@@ -305,7 +305,6 @@ impl<'a> Generator<'a> {
                 body,
                 decorator_list,
                 type_params,
-                range: _,
                 node: _,
             }) => {
                 self.newlines(if self.indent_depth == 0 { 2 } else { 1 });
@@ -351,11 +350,7 @@ impl<'a> Generator<'a> {
                     self.newlines(2);
                 }
             }
-            ast::StmtFields::Return(ast::StmtReturnFields {
-                value,
-                range: _,
-                node: _,
-            }) => {
+            ast::StmtFields::Return(ast::StmtReturnFields { value, node: _ }) => {
                 statement!({
                     if let Some(expr) = value {
                         self.p("return ");
@@ -365,11 +360,7 @@ impl<'a> Generator<'a> {
                     }
                 });
             }
-            ast::StmtFields::Delete(ast::StmtDeleteFields {
-                targets,
-                range: _,
-                node: _,
-            }) => {
+            ast::StmtFields::Delete(ast::StmtDeleteFields { targets, node: _ }) => {
                 statement!({
                     self.p("del ");
                     let mut first = true;
@@ -392,7 +383,6 @@ impl<'a> Generator<'a> {
                 target,
                 op,
                 value,
-                range: _,
                 node: _,
             }) => {
                 statement!({
@@ -422,7 +412,6 @@ impl<'a> Generator<'a> {
                 annotation,
                 value,
                 simple,
-                range: _,
                 node: _,
             }) => {
                 statement!({
@@ -468,7 +457,6 @@ impl<'a> Generator<'a> {
                 test,
                 body,
                 orelse,
-                range: _,
                 node: _,
             }) => {
                 statement!({
@@ -488,7 +476,6 @@ impl<'a> Generator<'a> {
                 test,
                 body,
                 elif_else_clauses,
-                range: _,
                 node: _,
             }) => {
                 statement!({
@@ -536,7 +523,6 @@ impl<'a> Generator<'a> {
             ast::StmtFields::Match(ast::StmtMatchFields {
                 subject,
                 cases,
-                range: _,
                 node: _,
             }) => {
                 statement!({
@@ -554,7 +540,6 @@ impl<'a> Generator<'a> {
             }
             ast::StmtFields::TypeAlias(ast::StmtTypeAliasFields {
                 name,
-                range: _,
                 node: _,
                 type_params,
                 value,
@@ -572,7 +557,6 @@ impl<'a> Generator<'a> {
             ast::StmtFields::Raise(ast::StmtRaiseFields {
                 exc,
                 cause,
-                range: _,
                 node: _,
             }) => {
                 statement!({
@@ -593,7 +577,6 @@ impl<'a> Generator<'a> {
                 orelse,
                 finalbody,
                 is_star,
-                range: _,
                 node: _,
             }) => {
                 statement!({
@@ -620,12 +603,7 @@ impl<'a> Generator<'a> {
                     self.body(finalbody);
                 }
             }
-            ast::StmtFields::Assert(ast::StmtAssertFields {
-                test,
-                msg,
-                range: _,
-                node: _,
-            }) => {
+            ast::StmtFields::Assert(ast::StmtAssertFields { test, msg, node: _ }) => {
                 statement!({
                     self.p("assert ");
                     self.unparse_expr(test, precedence::ASSERT);
@@ -638,7 +616,6 @@ impl<'a> Generator<'a> {
             ast::StmtFields::Import(ast::StmtImportFields {
                 names,
                 is_lazy,
-                range: _,
                 node: _,
             }) => {
                 statement!({
@@ -658,7 +635,6 @@ impl<'a> Generator<'a> {
                 names,
                 level,
                 is_lazy,
-                range: _,
                 node: _,
             }) => {
                 statement!({
@@ -682,11 +658,7 @@ impl<'a> Generator<'a> {
                     }
                 });
             }
-            ast::StmtFields::Global(ast::StmtGlobalFields {
-                names,
-                range: _,
-                node: _,
-            }) => {
+            ast::StmtFields::Global(ast::StmtGlobalFields { names, node: _ }) => {
                 statement!({
                     self.p("global ");
                     let mut first = true;
@@ -696,11 +668,7 @@ impl<'a> Generator<'a> {
                     }
                 });
             }
-            ast::StmtFields::Nonlocal(ast::StmtNonlocalFields {
-                names,
-                range: _,
-                node: _,
-            }) => {
+            ast::StmtFields::Nonlocal(ast::StmtNonlocalFields { names, node: _ }) => {
                 statement!({
                     self.p("nonlocal ");
                     let mut first = true;
@@ -710,11 +678,7 @@ impl<'a> Generator<'a> {
                     }
                 });
             }
-            ast::StmtFields::Expr(ast::StmtExprFields {
-                value,
-                range: _,
-                node: _,
-            }) => {
+            ast::StmtFields::Expr(ast::StmtExprFields { value, node: _ }) => {
                 statement!({
                     self.unparse_expr(value, precedence::EXPR);
                 });
@@ -752,7 +716,6 @@ impl<'a> Generator<'a> {
                 type_,
                 name,
                 body,
-                range: _,
                 node: _,
             }) => {
                 self.p("except");
@@ -775,23 +738,17 @@ impl<'a> Generator<'a> {
 
     fn unparse_pattern(&mut self, ast: Pattern<'_>) {
         match ast.fields() {
-            ast::PatternFields::MatchValue(ast::PatternMatchValueFields {
-                value,
-                range: _,
-                node: _,
-            }) => {
+            ast::PatternFields::MatchValue(ast::PatternMatchValueFields { value, node: _ }) => {
                 self.unparse_expr(value, precedence::MAX);
             }
             ast::PatternFields::MatchSingleton(ast::PatternMatchSingletonFields {
                 value,
-                range: _,
                 node: _,
             }) => {
                 self.unparse_singleton(value);
             }
             ast::PatternFields::MatchSequence(ast::PatternMatchSequenceFields {
                 patterns,
-                range: _,
                 node: _,
             }) => {
                 self.p("[");
@@ -824,7 +781,6 @@ impl<'a> Generator<'a> {
             ast::PatternFields::MatchClass(ast::PatternMatchClassFields {
                 cls,
                 arguments,
-                range: _,
                 node: _,
             }) => {
                 self.unparse_expr(cls, precedence::MAX);
@@ -843,11 +799,7 @@ impl<'a> Generator<'a> {
                 }
                 self.p(")");
             }
-            ast::PatternFields::MatchStar(ast::PatternMatchStarFields {
-                name,
-                range: _,
-                node: _,
-            }) => {
+            ast::PatternFields::MatchStar(ast::PatternMatchStarFields { name, node: _ }) => {
                 self.p("*");
                 if let Some(name) = name {
                     self.p_id(name);
@@ -858,7 +810,6 @@ impl<'a> Generator<'a> {
             ast::PatternFields::MatchAs(ast::PatternMatchAsFields {
                 pattern,
                 name,
-                range: _,
                 node: _,
             }) => {
                 if let Some(pattern) = pattern {
@@ -871,11 +822,7 @@ impl<'a> Generator<'a> {
                     self.p("_");
                 }
             }
-            ast::PatternFields::MatchOr(ast::PatternMatchOrFields {
-                patterns,
-                range: _,
-                node: _,
-            }) => {
+            ast::PatternFields::MatchOr(ast::PatternMatchOrFields { patterns, node: _ }) => {
                 let mut first = true;
                 for pattern in patterns {
                     self.p_delim(&mut first, " | ");
@@ -978,7 +925,6 @@ impl<'a> Generator<'a> {
             ast::ExprFields::BoolOp(ast::ExprBoolOpFields {
                 op,
                 values,
-                range: _,
                 node: _,
             }) => {
                 let (op, prec) = opprec!(bin, op, BoolOp, And("and", AND), Or("or", OR));
@@ -993,7 +939,6 @@ impl<'a> Generator<'a> {
             ast::ExprFields::Named(ast::ExprNamedFields {
                 target,
                 value,
-                range: _,
                 node: _,
             }) => {
                 group_if!(precedence::NAMED_EXPR, {
@@ -1006,7 +951,6 @@ impl<'a> Generator<'a> {
                 left,
                 op,
                 right,
-                range: _,
                 node: _,
             }) => {
                 let rassoc = matches!(op, Operator::Pow);
@@ -1037,7 +981,6 @@ impl<'a> Generator<'a> {
             ast::ExprFields::UnaryOp(ast::ExprUnaryOpFields {
                 op,
                 operand,
-                range: _,
                 node: _,
             }) => {
                 let (op, prec) = opprec!(
@@ -1057,7 +1000,6 @@ impl<'a> Generator<'a> {
             ast::ExprFields::Lambda(ast::ExprLambdaFields {
                 parameters,
                 body,
-                range: _,
                 node: _,
             }) => {
                 group_if!(precedence::LAMBDA, {
@@ -1074,7 +1016,6 @@ impl<'a> Generator<'a> {
                 test,
                 body,
                 orelse,
-                range: _,
                 node: _,
             }) => {
                 group_if!(precedence::IF_EXP, {
@@ -1118,7 +1059,6 @@ impl<'a> Generator<'a> {
             ast::ExprFields::ListComp(ast::ExprListCompFields {
                 elt,
                 generators,
-                range: _,
                 node: _,
             }) => {
                 self.p("[");
@@ -1129,7 +1069,6 @@ impl<'a> Generator<'a> {
             ast::ExprFields::SetComp(ast::ExprSetCompFields {
                 elt,
                 generators,
-                range: _,
                 node: _,
             }) => {
                 self.p("{");
@@ -1141,7 +1080,6 @@ impl<'a> Generator<'a> {
                 key,
                 value,
                 generators,
-                range: _,
                 node: _,
             }) => {
                 self.p("{");
@@ -1159,7 +1097,6 @@ impl<'a> Generator<'a> {
                 elt,
                 generators,
                 parenthesized: _,
-                range: _,
                 node: _,
             }) => {
                 self.p("(");
@@ -1167,21 +1104,13 @@ impl<'a> Generator<'a> {
                 self.unparse_comp(generators);
                 self.p(")");
             }
-            ast::ExprFields::Await(ast::ExprAwaitFields {
-                value,
-                range: _,
-                node: _,
-            }) => {
+            ast::ExprFields::Await(ast::ExprAwaitFields { value, node: _ }) => {
                 group_if!(precedence::AWAIT, {
                     self.p("await ");
                     self.unparse_expr(value, precedence::MAX);
                 });
             }
-            ast::ExprFields::Yield(ast::ExprYieldFields {
-                value,
-                range: _,
-                node: _,
-            }) => {
+            ast::ExprFields::Yield(ast::ExprYieldFields { value, node: _ }) => {
                 group_if!(precedence::YIELD, {
                     self.p("yield");
                     if let Some(value) = value {
@@ -1190,11 +1119,7 @@ impl<'a> Generator<'a> {
                     }
                 });
             }
-            ast::ExprFields::YieldFrom(ast::ExprYieldFromFields {
-                value,
-                range: _,
-                node: _,
-            }) => {
+            ast::ExprFields::YieldFrom(ast::ExprYieldFromFields { value, node: _ }) => {
                 group_if!(precedence::YIELD_FROM, {
                     self.p("yield from ");
                     self.unparse_expr(value, precedence::MAX);
@@ -1225,7 +1150,6 @@ impl<'a> Generator<'a> {
             ast::ExprFields::Call(ast::ExprCallFields {
                 func,
                 arguments,
-                range: _,
                 node: _,
             }) => {
                 self.unparse_expr(func, precedence::MAX);
@@ -1376,7 +1300,6 @@ impl<'a> Generator<'a> {
                 lower,
                 upper,
                 step,
-                range: _,
                 node: _,
             }) => {
                 if let Some(lower) = lower {
@@ -1579,7 +1502,6 @@ impl<'a> Generator<'a> {
                     debug_text,
                     conversion,
                     format_spec,
-                    range: _,
                     node: _,
                 },
             ) => self.unparse_interpolated_element(

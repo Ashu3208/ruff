@@ -116,10 +116,10 @@ pub(crate) fn unnecessary_cast_to_int(checker: &Checker, call_fields: &ExprCallF
         }
     };
 
-    let edit = Edit::range_replacement(content, call_fields.range);
+    let edit = Edit::range_replacement(content, call_fields.range());
     let fix = Fix::applicable_edit(edit, applicability);
     checker
-        .report_diagnostic(UnnecessaryCastToInt, call_fields.range)
+        .report_diagnostic(UnnecessaryCastToInt, call_fields.range())
         .set_fix(fix);
 }
 

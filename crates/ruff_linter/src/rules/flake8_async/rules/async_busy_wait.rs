@@ -1,5 +1,6 @@
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::{ExprKind, StmtKind, StmtWhileFields};
+use ruff_text_size::Ranged;
 
 use crate::Violation;
 use crate::checkers::ast::Checker;
@@ -91,7 +92,7 @@ pub(crate) fn async_busy_wait(checker: &Checker, while_stmt: &StmtWhileFields<'_
             AsyncBusyWait {
                 module: AsyncModule::try_from(&qualified_name).unwrap(),
             },
-            while_stmt.range,
+            while_stmt.range(),
         );
     }
 }

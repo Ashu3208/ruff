@@ -135,7 +135,7 @@ pub(crate) fn print_empty_string(checker: &Checker, call: &ast::ExprCallFields<'
         (reason, Separator::Remove)
     };
 
-    let mut diagnostic = checker.report_diagnostic(PrintEmptyString { reason }, call.range);
+    let mut diagnostic = checker.report_diagnostic(PrintEmptyString { reason }, call.range());
     diagnostic.set_fix(
         EmptyStringFix::from_call(
             call.node,

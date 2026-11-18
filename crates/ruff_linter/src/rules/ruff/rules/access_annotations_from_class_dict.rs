@@ -3,6 +3,7 @@ use crate::codes::Category;
 use crate::{FixAvailability, Violation};
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::{self as ast, ExprKind, PythonVersion};
+use ruff_text_size::Ranged;
 
 /// ## What it does
 /// Checks for uses of `foo.__dict__.get("__annotations__")` or
@@ -144,7 +145,7 @@ pub(crate) fn access_annotations_from_class_dict_with_get(
     if is_first_arg_correct {
         checker.report_diagnostic(
             AccessAnnotationsFromClassDict { python_version },
-            call.range,
+            call.range(),
         );
     }
 }
@@ -182,7 +183,7 @@ pub(crate) fn access_annotations_from_class_dict_by_key(
     if is_value_correct {
         checker.report_diagnostic(
             AccessAnnotationsFromClassDict { python_version },
-            subscript_fields.range,
+            subscript_fields.range(),
         );
     }
 }

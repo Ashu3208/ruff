@@ -1,3 +1,4 @@
+use ruff_text_size::Ranged;
 use std::string::ToString;
 
 use ruff_diagnostics::Applicability;
@@ -807,7 +808,7 @@ pub(crate) fn string_dot_format_extra_named_arguments(
     let names: Vec<Name> = missing.iter().map(|(_, name, _)| (*name).clone()).collect();
     let mut diagnostic = checker.report_diagnostic(
         StringDotFormatExtraNamedArguments { missing: names },
-        call_fields.range,
+        call_fields.range(),
     );
     diagnostic.try_set_fix(|| {
         let side_effects = missing.iter().any(|(_, _, value)| {
@@ -871,7 +872,7 @@ pub(crate) fn string_dot_format_extra_positional_arguments(
                 .map(ToString::to_string)
                 .collect::<Vec<String>>(),
         },
-        call.range,
+        call.range(),
     );
 
     if can_fix {
@@ -929,7 +930,7 @@ pub(crate) fn string_dot_format_missing_argument(
         .collect();
 
     if !missing.is_empty() {
-        checker.report_diagnostic(StringDotFormatMissingArguments { missing }, call.range);
+        checker.report_diagnostic(StringDotFormatMissingArguments { missing }, call.range());
     }
 }
 
@@ -940,6 +941,6 @@ pub(crate) fn string_dot_format_mixing_automatic(
     summary: &FormatSummary,
 ) {
     if !(summary.autos.is_empty() || summary.indices.is_empty()) {
-        checker.report_diagnostic(StringDotFormatMixingAutomatic, call.range);
+        checker.report_diagnostic(StringDotFormatMixingAutomatic, call.range());
     }
 }

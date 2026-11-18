@@ -2230,7 +2230,6 @@ pub(super) fn function_body_kind<'db>(
             exc: Some(exc),
             cause: None,
             node: _,
-            range: _,
         } = raise.fields()
     {
         if infer_type(exc).is_subtype_of(

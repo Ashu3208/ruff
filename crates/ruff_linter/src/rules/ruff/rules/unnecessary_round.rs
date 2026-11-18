@@ -4,6 +4,7 @@ use ruff_python_edits::unwrapped_call_argument;
 use ruff_python_semantic::SemanticModel;
 use ruff_python_semantic::analyze::type_inference::{NumberLike, PythonType, ResolvedPythonType};
 use ruff_python_semantic::analyze::typing;
+use ruff_text_size::Ranged;
 
 use crate::checkers::ast::Checker;
 use crate::codes::Category;
@@ -93,7 +94,7 @@ pub(crate) fn unnecessary_round(checker: &Checker, call: &ast::ExprCallFields<'_
         _ => return,
     };
 
-    if checker.comment_ranges().intersects(call.range) {
+    if checker.comment_ranges().intersects(call.range()) {
         applicability = Applicability::Unsafe;
     }
 
@@ -108,11 +109,11 @@ pub(crate) fn unnecessary_round(checker: &Checker, call: &ast::ExprCallFields<'_
         checker.tokens(),
         checker.source(),
     );
-    let edit = Edit::range_replacement(content, call.range);
+    let edit = Edit::range_replacement(content, call.range());
     let fix = Fix::applicable_edit(edit, applicability);
 
     checker
-        .report_diagnostic(UnnecessaryRound, call.range)
+        .report_diagnostic(UnnecessaryRound, call.range())
         .set_fix(fix);
 }
 

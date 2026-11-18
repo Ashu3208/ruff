@@ -74,7 +74,7 @@ pub(crate) fn os_makedirs(checker: &Checker, call: &ExprCallFields<'_>, segments
         return;
     }
 
-    let range = call.range;
+    let range = call.range();
     let mut diagnostic = checker.report_diagnostic(OsMakedirs, call.func.range());
 
     let Some(name) = call.arguments.find_argument_value("name", 0) else {
@@ -108,7 +108,7 @@ pub(crate) fn os_makedirs(checker: &Checker, call: &ExprCallFields<'_>, segments
     diagnostic.try_set_fix(|| {
         let (import_edit, binding) = checker.importer().get_or_import_symbol(
             &ImportRequest::import("pathlib", "Path"),
-            call.range.start(),
+            call.range().start(),
             checker.semantic(),
         )?;
 

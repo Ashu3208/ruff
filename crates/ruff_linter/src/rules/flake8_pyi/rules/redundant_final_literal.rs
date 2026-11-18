@@ -101,7 +101,7 @@ pub(crate) fn redundant_final_literal(
         RedundantFinalLiteral {
             literal: SourceCodeSnippet::from_str(checker.locator().slice(literal.range())),
         },
-        ann_assign.range,
+        ann_assign.range(),
     );
 
     // The literal value and the assignment value being different doesn't make sense, so we skip

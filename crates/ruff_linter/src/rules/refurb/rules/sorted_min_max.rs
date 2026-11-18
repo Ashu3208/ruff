@@ -189,7 +189,7 @@ pub(crate) fn sorted_min_max(checker: &Checker, subscript: &ast::ExprSubscriptFi
         (Index::Last, true) => MinMax::Min,
     };
 
-    let mut diagnostic = checker.report_diagnostic(SortedMinMax { min_max }, subscript.range);
+    let mut diagnostic = checker.report_diagnostic(SortedMinMax { min_max }, subscript.range());
 
     if checker.semantic().has_builtin_binding(min_max.as_str()) {
         diagnostic.set_fix({
@@ -206,7 +206,7 @@ pub(crate) fn sorted_min_max(checker: &Checker, subscript: &ast::ExprSubscriptFi
                 format!("{min_max}({list_expr})")
             };
 
-            let replacement = Edit::range_replacement(replacement, subscript.range);
+            let replacement = Edit::range_replacement(replacement, subscript.range());
             Fix::unsafe_edit(replacement)
         });
     }

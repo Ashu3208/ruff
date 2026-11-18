@@ -85,7 +85,7 @@ pub(crate) fn unnecessary_literal_within_list_call(
         UnnecessaryLiteralWithinListCall {
             kind: argument_kind,
         },
-        call_fields.range,
+        call_fields.range(),
     );
 
     // Convert `list([1, 2])` to `[1, 2]`

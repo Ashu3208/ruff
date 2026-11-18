@@ -148,7 +148,6 @@ pub(crate) fn convert_for_loop_to_any_all(checker: &Checker, stmt: Stmt<'_>) {
                 if let ExprFields::UnaryOp(ExprUnaryOpFields {
                     op: UnaryOp::Not,
                     operand,
-                    range: _,
                     node: _,
                 }) = loop_.test.fields()
                 {

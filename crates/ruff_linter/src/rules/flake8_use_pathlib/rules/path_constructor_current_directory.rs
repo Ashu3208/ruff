@@ -92,10 +92,10 @@ pub(crate) fn path_constructor_current_directory(
     match parent_and_next_path_fragment_range(checker.semantic(), checker.tokens()) {
         Some((parent_range, next_fragment_range)) => {
             let next_fragment_expr = checker.locator().slice(next_fragment_range);
-            let call_expr = checker.locator().slice(call.range);
+            let call_expr = checker.locator().slice(call.range());
 
             let relative_argument_range: Range<usize> = {
-                let range = arg.range() - call.range.start();
+                let range = arg.range() - call.range().start();
                 range.start().into()..range.end().into()
             };
 
@@ -114,7 +114,7 @@ pub(crate) fn path_constructor_current_directory(
                 checker.source(),
                 checker.tokens(),
             )?;
-            Ok(Fix::applicable_edit(edit, applicability(call.range)))
+            Ok(Fix::applicable_edit(edit, applicability(call.range())))
         }),
     }
 }

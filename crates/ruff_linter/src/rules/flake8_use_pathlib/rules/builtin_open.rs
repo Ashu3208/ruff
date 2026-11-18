@@ -140,7 +140,7 @@ pub(crate) fn builtin_open(checker: &Checker, call: &ExprCallFields<'_>, segment
     diagnostic.try_set_fix(|| {
         let (import_edit, binding) = checker.importer().get_or_import_symbol(
             &ImportRequest::import("pathlib", "Path"),
-            call.range.start(),
+            call.range().start(),
             checker.semantic(),
         )?;
 
@@ -177,7 +177,7 @@ pub(crate) fn builtin_open(checker: &Checker, call: &ExprCallFields<'_>, segment
             format!("{binding}({file_code}).open({open_args})")
         };
 
-        let range = call.range;
+        let range = call.range();
 
         let applicability = if checker.comment_ranges().intersects(range) {
             Applicability::Unsafe

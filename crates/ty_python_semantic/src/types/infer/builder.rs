@@ -5299,7 +5299,6 @@ impl<'db, 'ast> TypeInferenceBuilder<'db, 'ast> {
     fn infer_for_statement(&mut self, for_statement: ast::StmtFor<'_>) {
         let db = self.db();
         let ast::StmtForFields {
-            range: _,
             node: _,
             target,
             iter,
@@ -7289,7 +7288,6 @@ impl<'db, 'ast> TypeInferenceBuilder<'db, 'ast> {
                         match element.classify() {
                             InterpolatedStringElementKind::Interpolation(expression) => {
                                 let ast::InterpolatedElementFields {
-                                    range: _,
                                     node: _,
                                     expression,
                                     debug_text,

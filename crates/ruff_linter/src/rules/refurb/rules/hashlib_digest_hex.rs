@@ -119,7 +119,7 @@ pub(crate) fn hashlib_digest_hex(checker: &Checker, call: &ast::ExprCallFields<'
             )
         })
     {
-        let mut diagnostic = checker.report_diagnostic(HashlibDigestHex, call.range);
+        let mut diagnostic = checker.report_diagnostic(HashlibDigestHex, call.range());
         if arguments.is_empty() {
             let replacement_range = TextRange::new(value.end(), call.func.end());
 

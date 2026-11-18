@@ -90,7 +90,6 @@ fn match_full_slice<'a>(expr: Expr<'a>, semantic: &SemanticModel) -> Option<Expr
             lower: None,
             upper: None,
             step: None,
-            range: _,
             node: _,
         })
     ) {

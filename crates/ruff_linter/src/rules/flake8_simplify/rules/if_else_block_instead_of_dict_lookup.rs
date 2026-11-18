@@ -1,3 +1,4 @@
+use ruff_text_size::Ranged;
 use rustc_hash::FxHashSet;
 
 use ruff_macros::{ViolationMetadata, derive_message_formats};
@@ -147,5 +148,5 @@ pub(crate) fn if_else_block_instead_of_dict_lookup(
         return;
     }
 
-    checker.report_diagnostic(IfElseBlockInsteadOfDictLookup, stmt_if.range);
+    checker.report_diagnostic(IfElseBlockInsteadOfDictLookup, stmt_if.range());
 }

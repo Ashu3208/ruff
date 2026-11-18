@@ -1,6 +1,7 @@
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::ExprCallFields;
 use ruff_python_semantic::Modules;
+use ruff_text_size::Ranged;
 
 use crate::checkers::ast::Checker;
 use crate::codes::Category;
@@ -85,9 +86,9 @@ pub(crate) fn shallow_copy_environ(checker: &Checker, call: &ExprCallFields<'_>)
         return;
     }
 
-    let mut diagnostic = checker.report_diagnostic(ShallowCopyEnviron, call.range);
+    let mut diagnostic = checker.report_diagnostic(ShallowCopyEnviron, call.range());
     diagnostic.set_fix(Fix::unsafe_edit(Edit::range_replacement(
         format!("{}.copy()", checker.locator().slice(arg)),
-        call.range,
+        call.range(),
     )));
 }

@@ -104,12 +104,12 @@ pub(crate) fn unnecessary_if(checker: &Checker, stmt: &StmtIfFields<'_>) {
     let has_side_effects = contains_effect(test, |id| checker.semantic().has_builtin_binding(id))
         || any_over_expr(test, |expr| matches!(expr.classify(), ExprKind::Named(_)));
 
-    let mut diagnostic = checker.report_diagnostic(UnnecessaryIf, stmt.range);
+    let mut diagnostic = checker.report_diagnostic(UnnecessaryIf, stmt.range());
 
     if has_side_effects {
         // Replace `if cond: pass` with `cond` as an expression statement.
         let replacement = condition_as_expression_statement(test, stmt.node, checker);
-        let edit = Edit::range_replacement(replacement, stmt.range);
+        let edit = Edit::range_replacement(replacement, stmt.range());
         diagnostic.set_fix(Fix::safe_edit(edit));
     } else {
         let stmt_ref = checker.semantic().current_statement();

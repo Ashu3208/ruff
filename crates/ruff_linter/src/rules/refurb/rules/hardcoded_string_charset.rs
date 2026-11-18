@@ -1,5 +1,6 @@
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast as ast;
+use ruff_text_size::Ranged;
 use ruff_text_size::TextRange;
 
 use crate::checkers::ast::Checker;
@@ -58,7 +59,7 @@ pub(crate) fn hardcoded_string_charset_literal(
     }
 
     if let Some(charset) = check_charset_exact(expr.value.to_str().as_bytes()) {
-        push_diagnostic(checker, expr.range, charset);
+        push_diagnostic(checker, expr.range(), charset);
     }
 }
 

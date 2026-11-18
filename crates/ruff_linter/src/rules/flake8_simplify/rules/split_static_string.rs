@@ -4,6 +4,7 @@ use ruff_python_ast::{
     self as ast, BuildId, Builder, Expr, ExprKind, StringFlags, StringLiteralFlags, StringValue,
     UnaryOp,
 };
+use ruff_text_size::Ranged;
 use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
 
@@ -128,15 +129,15 @@ pub(crate) fn split_static_string(
         split_default(&mut builder, str_value, maxsplit_value, method)
     };
 
-    let mut diagnostic = checker.report_diagnostic(SplitStaticString { method }, call.range);
+    let mut diagnostic = checker.report_diagnostic(SplitStaticString { method }, call.range());
     if let Some(replacement_expr) = split_replacement {
         diagnostic.set_fix(Fix::applicable_edit(
             Edit::range_replacement(
                 checker.generator().expr(builder.get(replacement_expr)),
-                call.range,
+                call.range(),
             ),
             // The fix does not preserve comments within implicit string concatenations.
-            if checker.comment_ranges().intersects(call.range) {
+            if checker.comment_ranges().intersects(call.range()) {
                 Applicability::Unsafe
             } else {
                 Applicability::Safe

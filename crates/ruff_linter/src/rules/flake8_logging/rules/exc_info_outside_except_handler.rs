@@ -99,7 +99,7 @@ pub(crate) fn exc_info_outside_except_handler(checker: &Checker, call: &ExprCall
 
     let semantic = checker.semantic();
 
-    if !outside_handlers(call.range.start(), semantic) {
+    if !outside_handlers(call.range().start(), semantic) {
         return;
     }
 

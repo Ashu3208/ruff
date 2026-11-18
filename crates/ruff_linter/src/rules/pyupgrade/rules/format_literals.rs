@@ -1,3 +1,4 @@
+use ruff_text_size::Ranged;
 use std::sync::LazyLock;
 
 use anyhow::{Result, anyhow};
@@ -111,10 +112,10 @@ pub(crate) fn format_literals(
         Arguments::Reorder(&summary.indices)
     };
 
-    let mut diagnostic = checker.report_diagnostic(FormatLiterals, call.range);
+    let mut diagnostic = checker.report_diagnostic(FormatLiterals, call.range());
     diagnostic.try_set_fix(|| {
         generate_call(call.node, arguments, checker.locator(), checker.stylist())
-            .map(|suggestion| Fix::unsafe_edit(Edit::range_replacement(suggestion, call.range)))
+            .map(|suggestion| Fix::unsafe_edit(Edit::range_replacement(suggestion, call.range())))
     });
 }
 

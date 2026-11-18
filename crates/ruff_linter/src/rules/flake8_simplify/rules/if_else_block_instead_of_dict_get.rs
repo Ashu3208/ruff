@@ -199,7 +199,7 @@ pub(crate) fn if_else_block_instead_of_dict_get(
         IfElseBlockInsteadOfDictGet {
             contents: contents.clone(),
         },
-        stmt_if_fields.range,
+        stmt_if_fields.range(),
     );
     if !checker
         .comment_ranges()
@@ -207,7 +207,7 @@ pub(crate) fn if_else_block_instead_of_dict_get(
     {
         diagnostic.set_fix(Fix::unsafe_edit(Edit::range_replacement(
             contents,
-            stmt_if_fields.range,
+            stmt_if_fields.range(),
         )));
     }
 }

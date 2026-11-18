@@ -17,7 +17,6 @@ pub struct FormatStmtClassDef;
 impl FormatNodeRule<ruff_python_ast::kind::StmtClassDef> for FormatStmtClassDef {
     fn fmt_fields(&self, item: StmtClassDef<'_>, f: &mut PyFormatter) -> FormatResult<()> {
         let ast::StmtClassDefFields {
-            range: _,
             node: _,
             name,
             arguments,

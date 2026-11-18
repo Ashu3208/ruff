@@ -167,7 +167,7 @@ pub(crate) fn context_manager_iterator(
             parenthesized_range(item, parent.into(), tokens).unwrap_or_else(|| item.range());
         let import = checker.importer().get_or_import_symbol(
             &ImportRequest::import_from(module, generator),
-            function.range.start(),
+            function.range().start(),
             checker.semantic(),
         );
         // Reuse an existing import from the other module if it conflicts with
@@ -177,7 +177,7 @@ pub(crate) fn context_manager_iterator(
             import.or_else(|_| {
                 checker.importer().get_or_import_symbol(
                     &ImportRequest::import_from("typing", generator),
-                    function.range.start(),
+                    function.range().start(),
                     checker.semantic(),
                 )
             })?
@@ -185,7 +185,7 @@ pub(crate) fn context_manager_iterator(
             import.or_else(|_| {
                 checker.importer().get_or_import_symbol(
                     &ImportRequest::import_from("collections.abc", generator),
-                    function.range.start(),
+                    function.range().start(),
                     checker.semantic(),
                 )
             })?
@@ -195,7 +195,7 @@ pub(crate) fn context_manager_iterator(
         let (object_edit, return_type) = if visitor.returns_value {
             checker.importer().get_or_import_builtin_symbol(
                 "object",
-                function.range.start(),
+                function.range().start(),
                 checker.semantic(),
             )?
         } else {

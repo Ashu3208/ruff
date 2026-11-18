@@ -33,7 +33,7 @@ use std::marker::PhantomData;
 /// - `Return => stmt_return_fields` delegates to a function taking
 ///   `&ast::StmtReturn` and returning `Option<ComparableExpr<'_>>`. Only the
 ///   return value participates in comparison.
-/// - `Pass(ast::StmtPassFields { range: _, node: _ })` compares just the
+/// - `Pass(ast::StmtPassFields { node: _ })` compares just the
 ///   variant. Any two `pass` statements are structurally equal.
 ///
 /// Destructure the node exhaustively in the helper or the inline pattern so
@@ -108,7 +108,6 @@ impl<'a> From<ast::Alias<'a>> for ComparableAlias<'a> {
         let ast::AliasFields {
             name,
             asname,
-            range: _,
             node: _,
         } = alias.fields();
         Self {
@@ -129,7 +128,6 @@ impl<'a> From<ast::WithItem<'a>> for ComparableWithItem<'a> {
         let ast::WithItemFields {
             context_expr,
             optional_vars,
-            range: _,
             node: _,
         } = with_item.fields();
         Self {
@@ -150,7 +148,6 @@ impl<'a> From<ast::PatternKeyword<'a>> for ComparablePatternKeyword<'a> {
         let ast::PatternKeywordFields {
             attr,
             pattern,
-            range: _,
             node: _,
         } = keyword.fields();
         Self {
@@ -182,29 +179,17 @@ compare_enum!(ComparablePattern(PatternKind, classify) {
 });
 
 fn match_value_fields(node: ast::PatternMatchValue<'_>) -> ComparableExpr<'_> {
-    let ast::PatternMatchValueFields {
-        value,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::PatternMatchValueFields { value, node: _ } = node.fields();
     value.into()
 }
 
 fn match_singleton_fields(node: ast::PatternMatchSingleton<'_>) -> ast::Singleton {
-    let ast::PatternMatchSingletonFields {
-        value,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::PatternMatchSingletonFields { value, node: _ } = node.fields();
     value
 }
 
 fn match_sequence_fields(node: ast::PatternMatchSequence<'_>) -> ComparablePatternSlice<'_> {
-    let ast::PatternMatchSequenceFields {
-        patterns,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::PatternMatchSequenceFields { patterns, node: _ } = node.fields();
     ComparableSlice::new(patterns)
 }
 
@@ -281,11 +266,7 @@ fn match_class_fields(node: ast::PatternMatchClass<'_>) -> MatchClassFields<'_> 
 }
 
 fn match_star_fields(node: ast::PatternMatchStar<'_>) -> Option<&str> {
-    let ast::PatternMatchStarFields {
-        name,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::PatternMatchStarFields { name, node: _ } = node.fields();
     name.map(ast::Identifier::as_str)
 }
 
@@ -299,7 +280,6 @@ fn match_as_fields(node: ast::PatternMatchAs<'_>) -> MatchAsFields<'_> {
     let ast::PatternMatchAsFields {
         pattern,
         name,
-        range: _,
         node: _,
     } = node.fields();
     MatchAsFields {
@@ -309,11 +289,7 @@ fn match_as_fields(node: ast::PatternMatchAs<'_>) -> MatchAsFields<'_> {
 }
 
 fn match_or_fields(node: ast::PatternMatchOr<'_>) -> ComparablePatternSlice<'_> {
-    let ast::PatternMatchOrFields {
-        patterns,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::PatternMatchOrFields { patterns, node: _ } = node.fields();
     ComparableSlice::new(patterns)
 }
 
@@ -330,7 +306,6 @@ impl<'a> From<ast::MatchCase<'a>> for ComparableMatchCase<'a> {
             pattern,
             guard,
             body,
-            range: _,
             node: _,
         } = match_case.fields();
         Self {
@@ -345,7 +320,6 @@ impl<'a> From<ast::Decorator<'a>> for ComparableExpr<'a> {
     fn from(decorator: ast::Decorator<'a>) -> Self {
         let ast::DecoratorFields {
             expression,
-            range: _,
             node: _,
         } = decorator.fields();
         expression.into()
@@ -356,11 +330,7 @@ impl<'a> From<ast::Decorator<'a>> for ComparableExpr<'a> {
 struct ComparableText<'a>(&'a str);
 impl<'a> From<ast::Identifier<'a>> for ComparableText<'a> {
     fn from(identifier: ast::Identifier<'a>) -> Self {
-        let ast::IdentifierFields {
-            id,
-            range: _,
-            node: _,
-        } = identifier.fields();
+        let ast::IdentifierFields { id, node: _ } = identifier.fields();
         Self(id.as_str())
     }
 }
@@ -597,11 +567,7 @@ impl fmt::Debug for ComparableParametersFields<'_> {
 
 impl<'a> From<ast::Parameters<'a>> for ComparableParametersFields<'a> {
     fn from(parameters: ast::Parameters<'a>) -> Self {
-        let ast::ParametersFields {
-            items,
-            range: _,
-            node: _,
-        } = parameters.fields();
+        let ast::ParametersFields { items, node: _ } = parameters.fields();
         Self(items)
     }
 }
@@ -650,7 +616,6 @@ impl<'a> From<ast::Parameter<'a>> for ComparableParameter<'a> {
         let ast::ParameterFields {
             name,
             annotation,
-            range: _,
             node: _,
         } = arg.fields();
         Self {
@@ -671,7 +636,6 @@ impl<'a> From<ast::ParameterWithDefault<'a>> for ComparableParameterWithDefault<
         let ast::ParameterWithDefaultFields {
             parameter,
             default,
-            range: _,
             node: _,
         } = arg.fields();
         Self {
@@ -692,7 +656,6 @@ impl<'a> From<ast::Keyword<'a>> for ComparableKeyword<'a> {
         let ast::KeywordFields {
             arg,
             value,
-            range: _,
             node: _,
         } = keyword.fields();
         Self {
@@ -717,7 +680,6 @@ impl<'a> From<ast::Comprehension<'a>> for ComparableComprehension<'a> {
             iter,
             ifs,
             is_async,
-            range: _,
             node: _,
         } = comprehension.fields();
         Self {
@@ -742,7 +704,6 @@ impl<'a> From<ast::ExceptHandler<'a>> for ComparableExceptHandler<'a> {
             type_,
             name,
             body,
-            range: _,
             node: _,
         }) = except_handler.fields();
         Self {
@@ -941,7 +902,6 @@ fn interpolation_fields(node: ast::InterpolatedElement<'_>) -> InterpolationFiel
         debug_text,
         conversion,
         format_spec,
-        range: _,
         node: _,
     } = node.fields();
 
@@ -962,7 +922,6 @@ struct ComparableElifElseClause<'a> {
 impl<'a> From<ast::ElifElseClause<'a>> for ComparableElifElseClause<'a> {
     fn from(elif_else_clause: ast::ElifElseClause<'a>) -> Self {
         let ast::ElifElseClauseFields {
-            range: _,
             node: _,
             test,
             body,
@@ -989,29 +948,21 @@ compare_enum!(ComparableLiteral(LiteralExpression) {
     BytesLiteral => bytes_literal_parts,
     NumberLiteral => number_literal_fields,
     BooleanLiteral => boolean_literal_fields,
-    NoneLiteral(ast::ExprNoneLiteralFields { range: _, node: _ }),
-    EllipsisLiteral(ast::ExprEllipsisLiteralFields { range: _, node: _ }),
+    NoneLiteral(ast::ExprNoneLiteralFields { node: _ }),
+    EllipsisLiteral(ast::ExprEllipsisLiteralFields { node: _ }),
 });
 
 fn string_literal_parts(
     node: ast::ExprStringLiteral<'_>,
 ) -> ComparableSlice<'_, ast::kind::StringLiteral, ComparableText<'_>> {
-    let ast::ExprStringLiteralFields {
-        value,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::ExprStringLiteralFields { value, node: _ } = node.fields();
     ComparableSlice::new(value.as_slice())
 }
 
 fn bytes_literal_parts(
     node: ast::ExprBytesLiteral<'_>,
 ) -> ComparableSlice<'_, ast::kind::BytesLiteral, ComparableBytesLiteral<'_>> {
-    let ast::ExprBytesLiteralFields {
-        value,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::ExprBytesLiteralFields { value, node: _ } = node.fields();
     ComparableSlice::new(value.as_slice())
 }
 
@@ -1019,7 +970,6 @@ impl<'a> From<ast::StringLiteral<'a>> for ComparableText<'a> {
     fn from(literal: ast::StringLiteral<'a>) -> Self {
         let ast::StringLiteralFields {
             value,
-            range: _,
             node: _,
             flags: _,
         } = literal.fields();
@@ -1033,7 +983,6 @@ impl<'a> From<ast::BytesLiteral<'a>> for ComparableBytesLiteral<'a> {
     fn from(literal: ast::BytesLiteral<'a>) -> Self {
         let ast::BytesLiteralFields {
             value,
-            range: _,
             node: _,
             flags: _,
         } = literal.fields();
@@ -1085,8 +1034,8 @@ compare_enum!(ComparableExpr(ExprKind, classify; node_kind) {
     BytesLiteral => bytes_literal_fields,
     NumberLiteral => number_literal_fields,
     BooleanLiteral => boolean_literal_fields,
-    NoneLiteral(ast::ExprNoneLiteralFields { range: _, node: _ }),
-    EllipsisLiteral(ast::ExprEllipsisLiteralFields { range: _, node: _ }),
+    NoneLiteral(ast::ExprNoneLiteralFields { node: _ }),
+    EllipsisLiteral(ast::ExprEllipsisLiteralFields { node: _ }),
     Attribute => attribute_fields,
     Subscript => subscript_fields,
     Starred => starred_fields,
@@ -1125,7 +1074,6 @@ fn bool_op_fields(node: ast::ExprBoolOp<'_>) -> BoolOpFields<'_> {
     let ast::ExprBoolOpFields {
         op,
         values,
-        range: _,
         node: _,
     } = node.fields();
     BoolOpFields {
@@ -1144,7 +1092,6 @@ fn named_fields(node: ast::ExprNamed<'_>) -> NamedFields<'_> {
     let ast::ExprNamedFields {
         target,
         value,
-        range: _,
         node: _,
     } = node.fields();
     NamedFields {
@@ -1165,7 +1112,6 @@ fn bin_op_fields(node: ast::ExprBinOp<'_>) -> BinOpFields<'_> {
         left,
         op,
         right,
-        range: _,
         node: _,
     } = node.fields();
     BinOpFields {
@@ -1185,7 +1131,6 @@ fn unary_op_fields(node: ast::ExprUnaryOp<'_>) -> UnaryOpFields<'_> {
     let ast::ExprUnaryOpFields {
         op,
         operand,
-        range: _,
         node: _,
     } = node.fields();
     UnaryOpFields {
@@ -1204,7 +1149,6 @@ fn lambda_fields(node: ast::ExprLambda<'_>) -> LambdaFields<'_> {
     let ast::ExprLambdaFields {
         parameters,
         body,
-        range: _,
         node: _,
     } = node.fields();
     LambdaFields {
@@ -1225,7 +1169,6 @@ fn if_fields(node: ast::ExprIf<'_>) -> IfFields<'_> {
         test,
         body,
         orelse,
-        range: _,
         node: _,
     } = node.fields();
     IfFields {
@@ -1238,20 +1181,12 @@ fn if_fields(node: ast::ExprIf<'_>) -> IfFields<'_> {
 fn dict_fields(
     node: ast::ExprDict<'_>,
 ) -> ComparableSlice<'_, ast::kind::DictItem, ComparableDictItem<'_>> {
-    let ast::ExprDictFields {
-        items,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::ExprDictFields { items, node: _ } = node.fields();
     ComparableSlice::new(items)
 }
 
 fn set_fields(node: ast::ExprSet<'_>) -> ComparableExprSlice<'_> {
-    let ast::ExprSetFields {
-        elts,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::ExprSetFields { elts, node: _ } = node.fields();
     ComparableSlice::new(elts)
 }
 
@@ -1274,7 +1209,6 @@ fn list_comp_fields(node: ast::ExprListComp<'_>) -> ComprehensionExprFields<'_> 
     let ast::ExprListCompFields {
         elt,
         generators,
-        range: _,
         node: _,
     } = node.fields();
     ComprehensionExprFields::new(elt, generators)
@@ -1284,7 +1218,6 @@ fn set_comp_fields(node: ast::ExprSetComp<'_>) -> ComprehensionExprFields<'_> {
     let ast::ExprSetCompFields {
         elt,
         generators,
-        range: _,
         node: _,
     } = node.fields();
     ComprehensionExprFields::new(elt, generators)
@@ -1301,7 +1234,6 @@ fn dict_comp_fields(
         key,
         value,
         generators,
-        range: _,
         node: _,
     } = node.fields();
     (
@@ -1315,7 +1247,6 @@ fn generator_fields(node: ast::ExprGenerator<'_>) -> ComprehensionExprFields<'_>
     let ast::ExprGeneratorFields {
         elt,
         generators,
-        range: _,
         node: _,
         parenthesized: _,
     } = node.fields();
@@ -1323,29 +1254,17 @@ fn generator_fields(node: ast::ExprGenerator<'_>) -> ComprehensionExprFields<'_>
 }
 
 fn await_fields(node: ast::ExprAwait<'_>) -> ComparableExpr<'_> {
-    let ast::ExprAwaitFields {
-        value,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::ExprAwaitFields { value, node: _ } = node.fields();
     value.into()
 }
 
 fn yield_fields(node: ast::ExprYield<'_>) -> Option<ComparableExpr<'_>> {
-    let ast::ExprYieldFields {
-        value,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::ExprYieldFields { value, node: _ } = node.fields();
     value.map(Into::into)
 }
 
 fn yield_from_fields(node: ast::ExprYieldFrom<'_>) -> ComparableExpr<'_> {
-    let ast::ExprYieldFromFields {
-        value,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::ExprYieldFromFields { value, node: _ } = node.fields();
     value.into()
 }
 
@@ -1381,7 +1300,6 @@ fn compare_fields(node: ast::ExprCompare<'_>) -> CompareFields<'_> {
     let ast::ExprCompareFields {
         ops,
         operands,
-        range: _,
         node: _,
     } = node.fields();
     CompareFields {
@@ -1400,7 +1318,6 @@ fn call_fields(node: ast::ExprCall<'_>) -> CallFields<'_> {
     let ast::ExprCallFields {
         func,
         arguments,
-        range: _,
         node: _,
     } = node.fields();
     CallFields {
@@ -1410,58 +1327,34 @@ fn call_fields(node: ast::ExprCall<'_>) -> CallFields<'_> {
 }
 
 fn f_string_fields(node: ast::ExprFString<'_>) -> ComparableInterpolatedString<'_> {
-    let ast::ExprFStringFields {
-        value,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::ExprFStringFields { value, node: _ } = node.fields();
     ComparableInterpolatedString::FString(value)
 }
 
 fn t_string_fields(node: ast::ExprTString<'_>) -> ComparableInterpolatedString<'_> {
-    let ast::ExprTStringFields {
-        value,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::ExprTStringFields { value, node: _ } = node.fields();
     ComparableInterpolatedString::TString(value)
 }
 
 fn string_literal_fields(node: ast::ExprStringLiteral<'_>) -> &str {
-    let ast::ExprStringLiteralFields {
-        value,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::ExprStringLiteralFields { value, node: _ } = node.fields();
     // `"a" "b"` and `"ab"` both yield "ab". The AST caches the joined text
     // for the first spelling and lends the single literal's text for the second.
     value.to_str()
 }
 
 fn bytes_literal_fields(node: ast::ExprBytesLiteral<'_>) -> ComparableBytes<'_> {
-    let ast::ExprBytesLiteralFields {
-        value,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::ExprBytesLiteralFields { value, node: _ } = node.fields();
     ComparableBytes(value)
 }
 
 fn number_literal_fields(node: ast::ExprNumberLiteral<'_>) -> ComparableNumber<'_> {
-    let ast::ExprNumberLiteralFields {
-        value,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::ExprNumberLiteralFields { value, node: _ } = node.fields();
     ComparableNumber(value)
 }
 
 fn boolean_literal_fields(node: ast::ExprBooleanLiteral<'_>) -> bool {
-    let ast::ExprBooleanLiteralFields {
-        value,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::ExprBooleanLiteralFields { value, node: _ } = node.fields();
     value
 }
 
@@ -1476,7 +1369,6 @@ fn attribute_fields(node: ast::ExprAttribute<'_>) -> AttributeFields<'_> {
         value,
         attr,
         ctx: _,
-        range: _,
         node: _,
     } = node.fields();
     AttributeFields {
@@ -1496,7 +1388,6 @@ fn subscript_fields(node: ast::ExprSubscript<'_>) -> SubscriptFields<'_> {
         value,
         slice,
         ctx: _,
-        range: _,
         node: _,
     } = node.fields();
     SubscriptFields {
@@ -1509,7 +1400,6 @@ fn starred_fields(node: ast::ExprStarred<'_>) -> ComparableExpr<'_> {
     let ast::ExprStarredFields {
         value,
         ctx: _,
-        range: _,
         node: _,
     } = node.fields();
     value.into()
@@ -1519,7 +1409,6 @@ fn name_fields(node: ast::ExprName<'_>) -> &str {
     let ast::ExprNameFields {
         id,
         ctx: _,
-        range: _,
         node: _,
     } = node.fields();
     id.as_str()
@@ -1529,7 +1418,6 @@ fn list_fields(node: ast::ExprList<'_>) -> ComparableExprSlice<'_> {
     let ast::ExprListFields {
         elts,
         ctx: _,
-        range: _,
         node: _,
     } = node.fields();
     ComparableSlice::new(elts)
@@ -1539,7 +1427,6 @@ fn tuple_fields(node: ast::ExprTuple<'_>) -> ComparableExprSlice<'_> {
     let ast::ExprTupleFields {
         elts,
         ctx: _,
-        range: _,
         node: _,
         parenthesized: _,
     } = node.fields();
@@ -1558,7 +1445,6 @@ fn slice_fields(node: ast::ExprSlice<'_>) -> SliceFields<'_> {
         lower,
         upper,
         step,
-        range: _,
         node: _,
     } = node.fields();
     SliceFields {
@@ -1578,7 +1464,6 @@ fn ipy_escape_command_fields(node: ast::ExprIpyEscapeCommand<'_>) -> IpyEscapeCo
     let ast::ExprIpyEscapeCommandFields {
         kind,
         value,
-        range: _,
         node: _,
     } = node.fields();
     IpyEscapeCommandFields { kind, value }
@@ -1654,7 +1539,6 @@ impl<'a> From<ast::TypeParams<'a>> for ComparableTypeParams<'a> {
     fn from(params: ast::TypeParams<'a>) -> Self {
         let ast::TypeParamsFields {
             type_params,
-            range: _,
             node: _,
         } = params.fields();
         Self::new(type_params)
@@ -1687,7 +1571,6 @@ fn type_var_fields(node: ast::TypeParamTypeVar<'_>) -> TypeVarFields<'_> {
         name,
         bound,
         default,
-        range: _,
         node: _,
     } = node.fields();
     TypeVarFields {
@@ -1707,7 +1590,6 @@ fn type_var_tuple_fields(node: ast::TypeParamTypeVarTuple<'_>) -> VariadicTypePa
     let ast::TypeParamTypeVarTupleFields {
         name,
         default,
-        range: _,
         node: _,
     } = node.fields();
     VariadicTypeParamFields {
@@ -1720,7 +1602,6 @@ fn param_spec_fields(node: ast::TypeParamParamSpec<'_>) -> VariadicTypeParamFiel
     let ast::TypeParamParamSpecFields {
         name,
         default,
-        range: _,
         node: _,
     } = node.fields();
     VariadicTypeParamFields {
@@ -1762,9 +1643,9 @@ compare_enum!(ComparableStmt(StmtKind, classify) {
     Nonlocal => stmt_nonlocal_fields,
     IpyEscapeCommand => stmt_ipy_escape_command_fields,
     Expr => stmt_expr_fields,
-    Pass(ast::StmtPassFields { range: _, node: _ }),
-    Break(ast::StmtBreakFields { range: _, node: _ }),
-    Continue(ast::StmtContinueFields { range: _, node: _ }),
+    Pass(ast::StmtPassFields { node: _ }),
+    Break(ast::StmtBreakFields { node: _ }),
+    Continue(ast::StmtContinueFields { node: _ }),
 });
 
 #[derive(Debug, PartialEq, Eq, Hash)]
@@ -1787,7 +1668,6 @@ fn stmt_function_def_fields(node: ast::StmtFunctionDef<'_>) -> StmtFunctionDefFi
         decorator_list,
         returns,
         type_params,
-        range: _,
         node: _,
     } = node.fields();
     StmtFunctionDefFields {
@@ -1817,7 +1697,6 @@ fn stmt_class_def_fields(node: ast::StmtClassDef<'_>) -> StmtClassDefFields<'_> 
         body,
         decorator_list,
         type_params,
-        range: _,
         node: _,
     } = node.fields();
     StmtClassDefFields {
@@ -1830,20 +1709,12 @@ fn stmt_class_def_fields(node: ast::StmtClassDef<'_>) -> StmtClassDefFields<'_> 
 }
 
 fn stmt_return_fields(node: ast::StmtReturn<'_>) -> Option<ComparableExpr<'_>> {
-    let ast::StmtReturnFields {
-        value,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::StmtReturnFields { value, node: _ } = node.fields();
     value.map(Into::into)
 }
 
 fn stmt_delete_fields(node: ast::StmtDelete<'_>) -> ComparableExprSlice<'_> {
-    let ast::StmtDeleteFields {
-        targets,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::StmtDeleteFields { targets, node: _ } = node.fields();
     ComparableSlice::new(targets)
 }
 
@@ -1856,7 +1727,6 @@ struct StmtTypeAliasFields<'a> {
 
 fn stmt_type_alias_fields(node: ast::StmtTypeAlias<'_>) -> StmtTypeAliasFields<'_> {
     let ast::StmtTypeAliasFields {
-        range: _,
         node: _,
         name,
         type_params,
@@ -1879,7 +1749,6 @@ fn stmt_assign_fields(node: ast::StmtAssign<'_>) -> StmtAssignFields<'_> {
     let ast::StmtAssignFields {
         targets,
         value,
-        range: _,
         node: _,
     } = node.fields();
     StmtAssignFields {
@@ -1900,7 +1769,6 @@ fn stmt_aug_assign_fields(node: ast::StmtAugAssign<'_>) -> StmtAugAssignFields<'
         target,
         op,
         value,
-        range: _,
         node: _,
     } = node.fields();
     StmtAugAssignFields {
@@ -1924,7 +1792,6 @@ fn stmt_ann_assign_fields(node: ast::StmtAnnAssign<'_>) -> StmtAnnAssignFields<'
         annotation,
         value,
         simple,
-        range: _,
         node: _,
     } = node.fields();
     StmtAnnAssignFields {
@@ -1951,7 +1818,6 @@ fn stmt_for_fields(node: ast::StmtFor<'_>) -> StmtForFields<'_> {
         iter,
         body,
         orelse,
-        range: _,
         node: _,
     } = node.fields();
     StmtForFields {
@@ -1975,7 +1841,6 @@ fn stmt_while_fields(node: ast::StmtWhile<'_>) -> StmtWhileFields<'_> {
         test,
         body,
         orelse,
-        range: _,
         node: _,
     } = node.fields();
     StmtWhileFields {
@@ -1997,7 +1862,6 @@ fn stmt_if_fields(node: ast::StmtIf<'_>) -> StmtIfFields<'_> {
         test,
         body,
         elif_else_clauses,
-        range: _,
         node: _,
     } = node.fields();
     StmtIfFields {
@@ -2019,7 +1883,6 @@ fn stmt_with_fields(node: ast::StmtWith<'_>) -> StmtWithFields<'_> {
         is_async,
         items,
         body,
-        range: _,
         node: _,
     } = node.fields();
     StmtWithFields {
@@ -2039,7 +1902,6 @@ fn stmt_match_fields(node: ast::StmtMatch<'_>) -> StmtMatchFields<'_> {
     let ast::StmtMatchFields {
         subject,
         cases,
-        range: _,
         node: _,
     } = node.fields();
     StmtMatchFields {
@@ -2058,7 +1920,6 @@ fn stmt_raise_fields(node: ast::StmtRaise<'_>) -> StmtRaiseFields<'_> {
     let ast::StmtRaiseFields {
         exc,
         cause,
-        range: _,
         node: _,
     } = node.fields();
     StmtRaiseFields {
@@ -2083,7 +1944,6 @@ fn stmt_try_fields(node: ast::StmtTry<'_>) -> StmtTryFields<'_> {
         orelse,
         finalbody,
         is_star,
-        range: _,
         node: _,
     } = node.fields();
     StmtTryFields {
@@ -2102,12 +1962,7 @@ struct StmtAssertFields<'a> {
 }
 
 fn stmt_assert_fields(node: ast::StmtAssert<'_>) -> StmtAssertFields<'_> {
-    let ast::StmtAssertFields {
-        test,
-        msg,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::StmtAssertFields { test, msg, node: _ } = node.fields();
     StmtAssertFields {
         test: test.into(),
         msg: msg.map(Into::into),
@@ -2124,7 +1979,6 @@ fn stmt_import_fields(node: ast::StmtImport<'_>) -> StmtImportFields<'_> {
     let ast::StmtImportFields {
         names,
         is_lazy,
-        range: _,
         node: _,
     } = node.fields();
     StmtImportFields {
@@ -2147,7 +2001,6 @@ fn stmt_import_from_fields(node: ast::StmtImportFrom<'_>) -> StmtImportFromField
         names,
         level,
         is_lazy,
-        range: _,
         node: _,
     } = node.fields();
     StmtImportFromFields {
@@ -2161,22 +2014,14 @@ fn stmt_import_from_fields(node: ast::StmtImportFrom<'_>) -> StmtImportFromField
 fn stmt_global_fields(
     node: ast::StmtGlobal<'_>,
 ) -> ComparableSlice<'_, ast::kind::Identifier, ComparableText<'_>> {
-    let ast::StmtGlobalFields {
-        names,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::StmtGlobalFields { names, node: _ } = node.fields();
     ComparableSlice::new(names)
 }
 
 fn stmt_nonlocal_fields(
     node: ast::StmtNonlocal<'_>,
 ) -> ComparableSlice<'_, ast::kind::Identifier, ComparableText<'_>> {
-    let ast::StmtNonlocalFields {
-        names,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::StmtNonlocalFields { names, node: _ } = node.fields();
     ComparableSlice::new(names)
 }
 
@@ -2186,18 +2031,13 @@ fn stmt_ipy_escape_command_fields(
     let ast::StmtIpyEscapeCommandFields {
         kind,
         value,
-        range: _,
         node: _,
     } = node.fields();
     IpyEscapeCommandFields { kind, value }
 }
 
 fn stmt_expr_fields(node: ast::StmtExpr<'_>) -> ComparableExpr<'_> {
-    let ast::StmtExprFields {
-        value,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::StmtExprFields { value, node: _ } = node.fields();
     value.into()
 }
 
@@ -2222,20 +2062,12 @@ compare_enum!(ComparableMod(ModKind, classify) {
 });
 
 fn mod_module_fields(node: ast::ModModule<'_>) -> ComparableStmtSlice<'_> {
-    let ast::ModModuleFields {
-        body,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::ModModuleFields { body, node: _ } = node.fields();
     ComparableSlice::new(body)
 }
 
 fn mod_expression_fields(node: ast::ModExpression<'_>) -> ComparableExpr<'_> {
-    let ast::ModExpressionFields {
-        body,
-        range: _,
-        node: _,
-    } = node.fields();
+    let ast::ModExpressionFields { body, node: _ } = node.fields();
     body.into()
 }
 

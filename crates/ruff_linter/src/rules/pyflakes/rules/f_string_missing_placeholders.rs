@@ -84,7 +84,7 @@ pub(crate) fn f_string_missing_placeholders(checker: &Checker, expr: &ExprFStrin
         return;
     }
 
-    let applicability = if checker.in_docstring_position(expr.range) {
+    let applicability = if checker.in_docstring_position(expr.range()) {
         Applicability::Unsafe
     } else {
         Applicability::Safe

@@ -571,7 +571,6 @@ impl<'db, 'ast> TypeInferenceBuilder<'db, 'ast> {
 
     pub(super) fn infer_paramspec_deferred(&mut self, node: TypeParamParamSpec<'_>) {
         let ast::TypeParamParamSpecFields {
-            range: _,
             node: _,
             name,
             default: Some(default),
@@ -698,7 +697,6 @@ impl<'db, 'ast> TypeInferenceBuilder<'db, 'ast> {
 
     pub(super) fn infer_typevartuple_deferred(&mut self, node: TypeParamTypeVarTuple<'_>) {
         let ast::TypeParamTypeVarTupleFields {
-            range: _,
             node: _,
             name,
             default: Some(default),

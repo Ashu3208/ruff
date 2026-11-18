@@ -3895,7 +3895,6 @@ impl<'db, 'ast> SemanticIndexBuilder<'db, 'ast> {
                     returns,
                     body,
                     is_async: _,
-                    range: _,
                     node: _,
                 } = function_def.fields();
                 for decorator in decorator_list {

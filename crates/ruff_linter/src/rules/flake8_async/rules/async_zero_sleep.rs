@@ -123,7 +123,7 @@ pub(crate) fn async_zero_sleep(checker: &Checker, call: &ast::ExprCallFields<'_>
             return;
         }
 
-        let mut diagnostic = checker.report_diagnostic(AsyncZeroSleep { module }, call.range);
+        let mut diagnostic = checker.report_diagnostic(AsyncZeroSleep { module }, call.range());
         diagnostic.try_set_fix(|| {
             // `anyio.lowlevel` is a submodule, so we need `import anyio.lowlevel`
             // rather than `from anyio import lowlevel`.
@@ -141,7 +141,7 @@ pub(crate) fn async_zero_sleep(checker: &Checker, call: &ast::ExprCallFields<'_>
             Ok(Fix::applicable_edits(
                 import_edit,
                 [reference_edit, arg_edit],
-                if checker.comment_ranges().intersects(call.range) {
+                if checker.comment_ranges().intersects(call.range()) {
                     Applicability::Unsafe
                 } else {
                     Applicability::Safe

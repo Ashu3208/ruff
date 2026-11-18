@@ -514,7 +514,7 @@ fn unittest_raises_assertion(call: &ExprCallFields<'_>, extra_edits: Vec<Edit>, 
                     checker.semantic(),
                 )?;
                 let replace_call =
-                    Edit::range_replacement(format!("{binding}({args})"), call.range);
+                    Edit::range_replacement(format!("{binding}({args})"), call.range());
 
                 Ok(Fix::unsafe_edits(
                     import_pytest_raises,
@@ -665,7 +665,6 @@ fn is_composite_condition(test: Expr<'_>) -> CompositionKind {
             if let ast::ExprFields::BoolOp(ast::ExprBoolOpFields {
                 op: BoolOp::Or,
                 values,
-                range: _,
                 node: _,
             }) = operand.fields()
             {

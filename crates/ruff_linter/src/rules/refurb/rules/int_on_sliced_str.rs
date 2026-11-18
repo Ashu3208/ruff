@@ -124,7 +124,7 @@ pub(crate) fn int_on_sliced_str(checker: &Checker, call: &ast::ExprCallFields<'_
         return;
     }
 
-    let mut diagnostic = checker.report_diagnostic(IntOnSlicedStr { base: base_u8 }, call.range);
+    let mut diagnostic = checker.report_diagnostic(IntOnSlicedStr { base: base_u8 }, call.range());
     diagnostic.set_fix(Fix::unsafe_edits(
         Edit::range_replacement(
             checker.locator().slice(expr_subscript.value()).to_string(),

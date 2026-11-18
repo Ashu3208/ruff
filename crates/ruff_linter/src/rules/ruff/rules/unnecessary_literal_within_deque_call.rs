@@ -120,7 +120,7 @@ pub(crate) fn unnecessary_literal_within_deque_call(
         UnnecessaryEmptyIterableWithinDequeCall {
             has_maxlen: maxlen.is_some(),
         },
-        deque_fields.range,
+        deque_fields.range(),
     );
 
     // Return without a fix in the presence of a starred argument because we can't accurately

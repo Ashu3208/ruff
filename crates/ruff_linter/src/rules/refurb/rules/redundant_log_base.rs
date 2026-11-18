@@ -115,7 +115,7 @@ pub(crate) fn redundant_log_base(
             base,
             arg: checker.locator().slice(arg).into(),
         },
-        call.range,
+        call.range(),
     );
     diagnostic.try_set_fix(|| generate_fix(checker, call.node, base, arg));
 }

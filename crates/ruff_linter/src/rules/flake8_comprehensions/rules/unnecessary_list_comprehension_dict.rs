@@ -1,6 +1,7 @@
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::ExprCallFields;
 use ruff_python_ast::ExprKind;
+use ruff_text_size::Ranged;
 
 use crate::checkers::ast::Checker;
 use crate::codes::Category;
@@ -61,7 +62,7 @@ pub(crate) fn unnecessary_list_comprehension_dict(checker: &Checker, call: &Expr
     if !checker.semantic().has_builtin_binding("dict") {
         return;
     }
-    let mut diagnostic = checker.report_diagnostic(UnnecessaryListComprehensionDict, call.range);
+    let mut diagnostic = checker.report_diagnostic(UnnecessaryListComprehensionDict, call.range());
     diagnostic.try_set_fix(|| {
         fixes::fix_unnecessary_list_comprehension_dict(call.node.into(), checker)
             .map(Fix::unsafe_edit)

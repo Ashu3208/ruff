@@ -113,7 +113,7 @@ pub(crate) fn task_branch_as_short_circuit(
             AirflowTaskBranchAsShortCircuit {
                 kind: BranchKind::Decorator,
             },
-            function_def.range,
+            function_def.range(),
         );
     }
 }

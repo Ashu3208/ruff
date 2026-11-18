@@ -163,7 +163,7 @@ pub(crate) fn zip_instead_of_pairwise(checker: &Checker, call: &ast::ExprCallFie
             checker.semantic(),
         )?;
         let reference_edit =
-            Edit::range_replacement(format!("{binding}({})", first_arg_info.id), call.range);
+            Edit::range_replacement(format!("{binding}({})", first_arg_info.id), call.range());
         Ok(Fix::unsafe_edits(import_edit, [reference_edit]))
     });
 }

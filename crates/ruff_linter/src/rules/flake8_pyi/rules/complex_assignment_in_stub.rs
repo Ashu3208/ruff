@@ -1,4 +1,5 @@
 use ruff_python_ast::{self as ast, ExprKind};
+use ruff_text_size::Ranged;
 
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 
@@ -63,5 +64,5 @@ pub(crate) fn complex_assignment_in_stub(checker: &Checker, stmt: &ast::StmtAssi
     ) {
         return;
     }
-    checker.report_diagnostic(ComplexAssignmentInStub, stmt.range);
+    checker.report_diagnostic(ComplexAssignmentInStub, stmt.range());
 }

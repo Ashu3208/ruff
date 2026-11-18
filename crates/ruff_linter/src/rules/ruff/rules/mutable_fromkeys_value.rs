@@ -4,6 +4,7 @@ use crate::fix::syntax;
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::{Builder, Expr, ExprCallFields, ExprKind, ListId, build};
 use ruff_python_semantic::{SemanticModel, analyze::typing::is_mutable_expr};
+use ruff_text_size::Ranged;
 
 use ruff_python_codegen::Generator;
 use ruff_text_size::TextRange;
@@ -91,10 +92,10 @@ pub(crate) fn mutable_fromkeys_value(checker: &Checker, call: &ExprCallFields<'_
         return;
     }
 
-    let mut diagnostic = checker.report_diagnostic(MutableFromkeysValue, call.range);
+    let mut diagnostic = checker.report_diagnostic(MutableFromkeysValue, call.range());
     diagnostic.set_fix(Fix::unsafe_edit(Edit::range_replacement(
         generate_dict_comprehension(keys, value, checker.generator(), checker.semantic()),
-        call.range,
+        call.range(),
     )));
 }
 

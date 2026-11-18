@@ -487,8 +487,8 @@ pub(crate) fn f_strings(checker: &Checker, call: &ExprCallFields<'_>, summary: &
         return;
     }
 
-    let mut contents = String::with_capacity(checker.locator().slice(call.range).len());
-    let mut prev_end = call.range.start();
+    let mut contents = String::with_capacity(checker.locator().slice(call.range()).len());
+    let mut prev_end = call.range().start();
     for (range, conversion) in patches {
         let fstring = match conversion {
             FStringConversion::Convert(fstring) => fstring,
@@ -521,7 +521,7 @@ pub(crate) fn f_strings(checker: &Checker, call: &ExprCallFields<'_>, summary: &
     // and the string. For example, `return"foo"` is valid, but `returnf"foo"` is not.
     let existing = checker
         .locator()
-        .slice(TextRange::up_to(call.range.start()));
+        .slice(TextRange::up_to(call.range().start()));
     if existing
         .chars()
         .last()
@@ -549,7 +549,7 @@ pub(crate) fn f_strings(checker: &Checker, call: &ExprCallFields<'_>, summary: &
         return;
     }
 
-    let mut diagnostic = checker.report_diagnostic(FString, call.range);
+    let mut diagnostic = checker.report_diagnostic(FString, call.range());
 
     // Avoid fix if there are comments within the call:
     // ```
@@ -564,11 +564,12 @@ pub(crate) fn f_strings(checker: &Checker, call: &ExprCallFields<'_>, summary: &
             // Ex) `''.format(self.project)`
             diagnostic.set_fix(Fix::safe_edit(Edit::range_replacement(
                 checker.locator().slice(literal).to_string(),
-                call.range,
+                call.range(),
             )));
         } else {
             diagnostic.set_fix(Fix::safe_edit(Edit::range_replacement(
-                contents, call.range,
+                contents,
+                call.range(),
             )));
         }
     }

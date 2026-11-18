@@ -96,7 +96,7 @@ pub(crate) fn replace_stdout_stderr(checker: &Checker, call: &ast::ExprCallField
             return;
         }
 
-        let mut diagnostic = checker.report_diagnostic(ReplaceStdoutStderr, call.range);
+        let mut diagnostic = checker.report_diagnostic(ReplaceStdoutStderr, call.range());
         if capture_output.is_none() {
             diagnostic.try_set_fix(|| {
                 generate_fix(

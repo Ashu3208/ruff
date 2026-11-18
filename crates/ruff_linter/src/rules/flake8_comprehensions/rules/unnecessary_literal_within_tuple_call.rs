@@ -89,7 +89,7 @@ pub(crate) fn unnecessary_literal_within_tuple_call(
         UnnecessaryLiteralWithinTupleCall {
             literal_kind: argument_kind,
         },
-        call.range,
+        call.range(),
     );
 
     match argument.fields() {
@@ -110,7 +110,7 @@ pub(crate) fn unnecessary_literal_within_tuple_call(
                 // Replace `[` with `(`.
                 let elt_start = Edit::replacement(
                     "(".into(),
-                    call.range.start(),
+                    call.range().start(),
                     argument.start() + TextSize::from(1),
                 );
                 // Replace `]` with `)` or `,)`.
@@ -121,7 +121,7 @@ pub(crate) fn unnecessary_literal_within_tuple_call(
                         ")".into()
                     },
                     argument.end() - TextSize::from(1),
-                    call.range.end(),
+                    call.range().end(),
                 );
                 Fix::unsafe_edits(elt_start, [elt_end])
             });

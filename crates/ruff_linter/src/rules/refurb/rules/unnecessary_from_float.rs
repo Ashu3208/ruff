@@ -129,7 +129,7 @@ pub(crate) fn unnecessary_from_float(checker: &Checker, call_fields: &ExprCallFi
             method_name,
             constructor,
         },
-        call_fields.range,
+        call_fields.range(),
     );
 
     // Validate that the method call has correct arguments and get the argument value
@@ -139,7 +139,7 @@ pub(crate) fn unnecessary_from_float(checker: &Checker, call_fields: &ExprCallFi
     };
 
     let constructor_name = checker.locator().slice(value).to_string();
-    let has_comments = checker.comment_ranges().intersects(call_fields.range);
+    let has_comments = checker.comment_ranges().intersects(call_fields.range());
 
     // Special case for non-finite float literals: Decimal.from_float(float("inf")) -> Decimal("inf")
     if let Some(replacement) = handle_non_finite_float_special_case(
@@ -175,7 +175,7 @@ pub(crate) fn unnecessary_from_float(checker: &Checker, call_fields: &ExprCallFi
     let arg_text = checker.locator().slice(arg_value);
     let replacement_text = format!("{constructor_name}({arg_text})");
 
-    let edit = Edit::range_replacement(replacement_text, call_fields.range);
+    let edit = Edit::range_replacement(replacement_text, call_fields.range());
 
     diagnostic.set_fix(Fix::applicable_edit(edit, applicability));
 }

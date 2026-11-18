@@ -131,7 +131,7 @@ pub(crate) fn quadratic_list_summation(checker: &Checker, call: &ast::ExprCallFi
 
     let fix_style = QuadraticListSummationFixStyle::from_target_version(checker.target_version());
     let mut diagnostic =
-        checker.report_diagnostic(QuadraticListSummation { fix_style }, call.range);
+        checker.report_diagnostic(QuadraticListSummation { fix_style }, call.range());
     diagnostic.try_set_fix(|| convert_to_fix(iterable, call.node, checker, fix_style));
 }
 

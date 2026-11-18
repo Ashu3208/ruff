@@ -228,7 +228,7 @@ pub(crate) fn native_literals(
     match call_arg {
         None => {
             let mut diagnostic =
-                checker.report_diagnostic(NativeLiterals { literal_type }, call_fields.range);
+                checker.report_diagnostic(NativeLiterals { literal_type }, call_fields.range());
 
             let mut builder = Builder::default();
             let expr = literal_type.as_zero_value_expr(&mut builder, checker);
@@ -244,7 +244,7 @@ pub(crate) fn native_literals(
 
             diagnostic.set_fix(Fix::safe_edit(Edit::range_replacement(
                 content,
-                call_fields.range,
+                call_fields.range(),
             )));
         }
         Some(arg) => {
@@ -285,7 +285,7 @@ pub(crate) fn native_literals(
             //
             // Subtract 1 from the end of the range to include `Rpar` token in the slice.
             if let [paren_token, next_token, ..] =
-                tokens.after(call_fields.range.sub_end(1.into()).end())
+                tokens.after(call_fields.range().sub_end(1.into()).end())
             {
                 needs_space = next_token.kind().is_keyword()
                     && paren_token.range().end() == next_token.range().start();
@@ -326,16 +326,16 @@ pub(crate) fn native_literals(
                 content.push(' ');
             }
 
-            let applicability = if checker.comment_ranges().intersects(call_fields.range) {
+            let applicability = if checker.comment_ranges().intersects(call_fields.range()) {
                 Applicability::Unsafe
             } else {
                 Applicability::Safe
             };
-            let edit = Edit::range_replacement(content, call_fields.range);
+            let edit = Edit::range_replacement(content, call_fields.range());
             let fix = Fix::applicable_edit(edit, applicability);
 
             checker
-                .report_diagnostic(NativeLiterals { literal_type }, call_fields.range)
+                .report_diagnostic(NativeLiterals { literal_type }, call_fields.range())
                 .set_fix(fix);
         }
     }

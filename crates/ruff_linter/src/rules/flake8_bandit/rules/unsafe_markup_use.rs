@@ -1,5 +1,6 @@
 use ruff_python_ast::ExprCallFields;
 use ruff_python_ast::{Arguments, Expr, ExprKind};
+use ruff_text_size::Ranged;
 
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::name::QualifiedName;
@@ -118,7 +119,7 @@ pub(crate) fn unsafe_markup_call(checker: &Checker, call: &ExprCallFields<'_>) {
         UnsafeMarkupUse {
             name: qualified_name.to_string(),
         },
-        call.range,
+        call.range(),
     );
 }
 

@@ -639,7 +639,6 @@ pub(crate) fn definition(
     };
 
     let ast::StmtFunctionDefFields {
-        range: _,
         node: _,
         is_async: _,
         decorator_list,

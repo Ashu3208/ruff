@@ -1,3 +1,4 @@
+use ruff_text_size::Ranged;
 use std::fmt;
 
 use ruff_python_ast::ExprCallFields;
@@ -75,7 +76,7 @@ pub(crate) fn re_sub_positional_args(
     };
 
     if call.arguments.args().get(method.num_args()).is_some() {
-        checker.report_diagnostic(ReSubPositionalArgs { method }, call.range);
+        checker.report_diagnostic(ReSubPositionalArgs { method }, call.range());
     }
 }
 

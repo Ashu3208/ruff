@@ -1,6 +1,7 @@
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::{self as ast, Arguments, Expr, ExprKind};
 use ruff_python_semantic::{Modules, SemanticModel};
+use ruff_text_size::Ranged;
 
 use crate::Violation;
 use crate::checkers::ast::Checker;
@@ -77,7 +78,10 @@ pub(crate) fn unnecessary_regular_expression_compile(
         return;
     }
 
-    checker.report_diagnostic(UnnecessaryRegularExpressionCompile { re_func }, call.range);
+    checker.report_diagnostic(
+        UnnecessaryRegularExpressionCompile { re_func },
+        call.range(),
+    );
 }
 
 /// If `pattern.<attr>(<arguments>)` is equivalent to a call to the top-level `re.<attr>(...)`,

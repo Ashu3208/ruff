@@ -90,7 +90,6 @@ impl FormatNodeRule<ruff_python_ast::kind::StmtFunctionDef> for FormatStmtFuncti
 
 fn format_function_header(f: &mut PyFormatter, item: StmtFunctionDef<'_>) -> FormatResult<()> {
     let ast::StmtFunctionDefFields {
-        range: _,
         node: _,
         is_async,
         decorator_list: _,

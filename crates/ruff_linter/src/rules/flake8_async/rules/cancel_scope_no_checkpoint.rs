@@ -2,6 +2,7 @@ use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast as ast;
 use ruff_python_ast::helpers::{AwaitVisitor, any_over_body};
 use ruff_python_ast::visitor::Visitor;
+use ruff_text_size::Ranged;
 
 use crate::Violation;
 use crate::checkers::ast::Checker;
@@ -103,5 +104,5 @@ pub(crate) fn cancel_scope_no_checkpoint(checker: &Checker, with_stmt: &ast::Stm
         return;
     }
 
-    checker.report_diagnostic(CancelScopeNoCheckpoint { method_name }, with_stmt.range);
+    checker.report_diagnostic(CancelScopeNoCheckpoint { method_name }, with_stmt.range());
 }

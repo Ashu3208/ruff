@@ -60,7 +60,7 @@ pub(crate) fn debugger_call(
             Debugger {
                 using_type: DebuggerUsingType::Call(qualified_name.to_string()),
             },
-            call.range,
+            call.range(),
         );
     }
 }

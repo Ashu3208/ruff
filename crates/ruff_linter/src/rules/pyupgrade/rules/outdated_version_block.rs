@@ -289,9 +289,10 @@ fn fix_always_false_branch(
             // If we have an `if` and an `elif`, turn the `elif` into an `if`
             Some(ast::ElifElseClauseFields {
                 test: Some(_),
-                range,
+                node,
                 ..
             }) => {
+                let range = node.range();
                 debug_assert_eq!(
                     checker
                         .locator()

@@ -88,13 +88,13 @@ pub(crate) fn unnecessary_generator_list(checker: &Checker, call: &ast::ExprCall
                     "list({})",
                     checker.locator().slice(generator.iter().range())
                 );
-                let fix = Fix::unsafe_edit(Edit::range_replacement(iterator, call.range));
+                let fix = Fix::unsafe_edit(Edit::range_replacement(iterator, call.range()));
                 checker
                     .report_diagnostic(
                         UnnecessaryGeneratorList {
                             short_circuit: true,
                         },
-                        call.range,
+                        call.range(),
                     )
                     .set_fix(fix);
                 return;
@@ -107,13 +107,13 @@ pub(crate) fn unnecessary_generator_list(checker: &Checker, call: &ast::ExprCall
         UnnecessaryGeneratorList {
             short_circuit: false,
         },
-        call.range,
+        call.range(),
     );
     let fix = {
         // Replace `list(` with `[`.
         let call_start = Edit::replacement(
             "[".to_string(),
-            call.range.start(),
+            call.range().start(),
             call.arguments.start() + TextSize::from(1),
         );
 
@@ -121,13 +121,13 @@ pub(crate) fn unnecessary_generator_list(checker: &Checker, call: &ast::ExprCall
         // Place `]` at argument's end or at trailing comma if present
         let after_arg_tokens = checker
             .tokens()
-            .in_range(TextRange::new(argument.end(), call.range.end()));
+            .in_range(TextRange::new(argument.end(), call.range().end()));
         let right_bracket_loc = after_arg_tokens
             .iter()
             .find(|token| token.kind() == TokenKind::Comma)
             .map_or(call.arguments.end(), Ranged::end)
             - TextSize::from(1);
-        let call_end = Edit::replacement("]".to_string(), right_bracket_loc, call.range.end());
+        let call_end = Edit::replacement("]".to_string(), right_bracket_loc, call.range().end());
 
         // Remove the inner parentheses, if the expression is a generator. The easiest way to do
         // this reliably is to use the printer.

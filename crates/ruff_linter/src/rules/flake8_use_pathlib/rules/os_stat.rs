@@ -142,7 +142,7 @@ pub(crate) fn os_stat(checker: &Checker, call: &ExprCallFields<'_>, segment: &[&
         }
     };
 
-    let range = call.range;
+    let range = call.range();
     let mut diagnostic = checker.report_diagnostic(OsStat { method }, call.func.range());
 
     if !is_fix_os_stat_enabled(checker.settings()) {
@@ -161,7 +161,7 @@ pub(crate) fn os_stat(checker: &Checker, call: &ExprCallFields<'_>, segment: &[&
     diagnostic.try_set_fix(|| {
         let (import_edit, binding) = checker.importer().get_or_import_symbol(
             &ImportRequest::import("pathlib", "Path"),
-            call.range.start(),
+            call.range().start(),
             checker.semantic(),
         )?;
 

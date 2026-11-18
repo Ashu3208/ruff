@@ -105,7 +105,7 @@ pub(crate) fn starmap_zip(
         return;
     }
 
-    let mut diagnostic = checker.report_diagnostic(StarmapZip, call.range);
+    let mut diagnostic = checker.report_diagnostic(StarmapZip, call.range());
 
     if let Some(fix) = replace_with_map(call.node, iterable_call, checker) {
         diagnostic.set_fix(fix);

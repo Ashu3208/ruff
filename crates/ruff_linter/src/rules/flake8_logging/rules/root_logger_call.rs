@@ -1,6 +1,7 @@
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast as ast;
 use ruff_python_semantic::Modules;
+use ruff_text_size::Ranged;
 
 use crate::Violation;
 use crate::checkers::ast::Checker;
@@ -66,5 +67,5 @@ pub(crate) fn root_logger_call(checker: &Checker, call: &ast::ExprCallFields<'_>
     let kind = RootLoggerCall {
         attr: (*attr).to_string(),
     };
-    checker.report_diagnostic(kind, call.range);
+    checker.report_diagnostic(kind, call.range());
 }

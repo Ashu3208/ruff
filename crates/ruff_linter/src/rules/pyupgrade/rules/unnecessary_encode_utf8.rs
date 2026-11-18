@@ -172,7 +172,7 @@ pub(crate) fn unnecessary_encode_utf8(checker: &Checker, call: &ast::ExprCallFie
                         UnnecessaryEncodeUTF8 {
                             reason: Reason::BytesLiteral,
                         },
-                        call.range,
+                        call.range(),
                     );
                     diagnostic.set_fix(replace_with_bytes_literal(
                         checker.locator(),
@@ -186,7 +186,7 @@ pub(crate) fn unnecessary_encode_utf8(checker: &Checker, call: &ast::ExprCallFie
                         UnnecessaryEncodeUTF8 {
                             reason: Reason::DefaultArgument,
                         },
-                        call.range,
+                        call.range(),
                     );
                     diagnostic.try_set_fix(|| {
                         remove_argument(
@@ -204,7 +204,7 @@ pub(crate) fn unnecessary_encode_utf8(checker: &Checker, call: &ast::ExprCallFie
                         UnnecessaryEncodeUTF8 {
                             reason: Reason::DefaultArgument,
                         },
-                        call.range,
+                        call.range(),
                     );
                     diagnostic.try_set_fix(|| {
                         remove_argument(
@@ -229,7 +229,7 @@ pub(crate) fn unnecessary_encode_utf8(checker: &Checker, call: &ast::ExprCallFie
                         UnnecessaryEncodeUTF8 {
                             reason: Reason::DefaultArgument,
                         },
-                        call.range,
+                        call.range(),
                     );
                     diagnostic.try_set_fix(|| {
                         remove_argument(
@@ -247,7 +247,7 @@ pub(crate) fn unnecessary_encode_utf8(checker: &Checker, call: &ast::ExprCallFie
                         UnnecessaryEncodeUTF8 {
                             reason: Reason::DefaultArgument,
                         },
-                        call.range,
+                        call.range(),
                     );
                     diagnostic.try_set_fix(|| {
                         remove_argument(

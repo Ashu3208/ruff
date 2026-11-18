@@ -1,6 +1,7 @@
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::{self as ast, Expr, ExprKind, Number, PythonVersion, UnaryOp};
 use ruff_source_file::find_newline;
+use ruff_text_size::Ranged;
 
 use crate::checkers::ast::Checker;
 use crate::codes::Category;
@@ -128,7 +129,7 @@ pub(crate) fn fstring_number_format(checker: &Checker, subscript: &ast::ExprSubs
     };
 
     let applicability = if matches!(maybe_number.classify(), ExprKind::NumberLiteral(_)) {
-        if checker.comment_ranges().intersects(subscript.range) {
+        if checker.comment_ranges().intersects(subscript.range()) {
             Applicability::Unsafe
         } else {
             Applicability::Safe
@@ -144,11 +145,11 @@ pub(crate) fn fstring_number_format(checker: &Checker, subscript: &ast::ExprSubs
             replacement: replacement.as_deref().map(SourceCodeSnippet::from_str),
             base,
         },
-        subscript.range,
+        subscript.range(),
     );
 
     if let Some(replacement) = replacement {
-        let edit = Edit::range_replacement(replacement, subscript.range);
+        let edit = Edit::range_replacement(replacement, subscript.range());
         diagnostic.set_fix(Fix::applicable_edit(edit, applicability));
     }
 }

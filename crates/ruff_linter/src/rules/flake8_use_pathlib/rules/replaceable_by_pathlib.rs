@@ -79,14 +79,14 @@ pub(crate) fn replaceable_by_pathlib(
                     diagnostic.try_set_fix(|| {
                         let (import_edit, binding) = checker.importer().get_or_import_symbol(
                             &ImportRequest::import("pathlib", "Path"),
-                            call.range.start(),
+                            call.range().start(),
                             checker.semantic(),
                         )?;
 
                         Ok(Fix::applicable_edits(
                             Edit::range_replacement(
                                 format!("{binding}({}).iterdir()", checker.locator().slice(path)),
-                                call.range,
+                                call.range(),
                             ),
                             [import_edit],
                             Applicability::DisplayOnly,

@@ -172,7 +172,7 @@ pub(crate) fn repeated_equality_comparison(checker: &Checker, bool_op: ExprBoolO
                     )),
                     all_hashable,
                 },
-                bool_op.range,
+                bool_op.range(),
             );
 
             // Grab the remaining comparisons.
@@ -199,7 +199,7 @@ pub(crate) fn repeated_equality_comparison(checker: &Checker, bool_op: ExprBoolO
             let operands = builder.list([left, comparator]);
             let membership = builder
                 .add(build::ExprCompare {
-                    range: bool_op.range,
+                    range: bool_op.range(),
                     operands,
                     ops,
                 })
@@ -215,13 +215,13 @@ pub(crate) fn repeated_equality_comparison(checker: &Checker, bool_op: ExprBoolO
                 },
             );
             let expression = builder.add(build::ExprBoolOp {
-                range: bool_op.range,
+                range: bool_op.range(),
                 op: bool_op.op,
                 values,
             });
             diagnostic.set_fix(Fix::unsafe_edit(Edit::range_replacement(
                 checker.generator().expr(builder.get(expression).into()),
-                bool_op.range,
+                bool_op.range(),
             )));
         }
     }

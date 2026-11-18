@@ -1,6 +1,7 @@
 use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::ExprCallFields;
 use ruff_python_ast::ExprKind;
+use ruff_text_size::Ranged;
 
 use crate::checkers::ast::Checker;
 use crate::codes::Category;
@@ -78,7 +79,7 @@ pub(crate) fn unnecessary_literal_dict(checker: &Checker, call: &ExprCallFields<
         return;
     }
     let mut diagnostic =
-        checker.report_diagnostic(UnnecessaryLiteralDict { obj_type: kind }, call.range);
+        checker.report_diagnostic(UnnecessaryLiteralDict { obj_type: kind }, call.range());
     diagnostic.try_set_fix(|| {
         fixes::fix_unnecessary_literal_dict(call.node.into(), checker).map(Fix::unsafe_edit)
     });

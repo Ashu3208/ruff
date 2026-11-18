@@ -2,6 +2,7 @@ use ruff_macros::{ViolationMetadata, derive_message_formats};
 use ruff_python_ast::{self as ast, Expr, ExprKind, ExprName, Int, UnaryOp};
 use ruff_python_semantic::SemanticModel;
 use ruff_python_semantic::analyze::typing;
+use ruff_text_size::Ranged;
 
 use crate::checkers::ast::Checker;
 use crate::codes::Category;
@@ -97,11 +98,11 @@ pub(crate) fn list_assign_reversed(checker: &Checker, assign: &ast::StmtAssignFi
             ListReverseCopy {
                 name: target_expr.id().to_string(),
             },
-            assign.range,
+            assign.range(),
         )
         .set_fix(Fix::unsafe_edit(Edit::range_replacement(
             format!("{}.reverse()", target_expr.id()),
-            assign.range,
+            assign.range(),
         )));
 }
 

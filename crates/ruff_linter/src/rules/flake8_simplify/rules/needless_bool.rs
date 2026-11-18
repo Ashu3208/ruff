@@ -134,13 +134,11 @@ pub(crate) fn needless_bool(checker: &Checker, stmt: Stmt<'_>) {
                 && let ast::ElifElseClauseFields {
                     body: elif_body,
                     test: Some(elif_test),
-                    range: elif_range,
                     ..
                 } = elif_else_clause.fields()
                 && let ast::ElifElseClauseFields {
                     body: else_body,
                     test: None,
-                    range: else_range,
                     ..
                 } = else_clause.fields() =>
         {
@@ -148,7 +146,7 @@ pub(crate) fn needless_bool(checker: &Checker, stmt: Stmt<'_>) {
                 elif_test,
                 elif_body,
                 is_one_line_return_bool(else_body),
-                TextRange::new(elif_range.start(), else_range.end()),
+                TextRange::new(elif_else_clause.start(), else_clause.end()),
             )
         }
         // if-implicit-else case:
