@@ -385,6 +385,7 @@ struct EditorConfigurationTransformer {
 impl EditorConfigurationTransformer {
     fn new(settings: &EditorSettings, project_root: &Path) -> Self {
         let EditorSettings {
+            server_preview,
             configuration,
             format_preview,
             lint_preview,
@@ -398,6 +399,7 @@ impl EditorConfigurationTransformer {
         } = settings.clone();
 
         let editor_configuration = Configuration {
+            preview: server_preview.map(PreviewMode::from),
             lint: LintConfiguration {
                 preview: lint_preview.map(PreviewMode::from),
                 rule_selections: vec![RuleSelection {
