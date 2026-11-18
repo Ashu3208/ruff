@@ -4192,6 +4192,42 @@ fn inline_script_namespace_packages() -> Result<()> {
 }
 
 #[test]
+fn script_cache_respects_configuration_mode() -> Result<()> {
+    let test = CliTest::with_file(
+        "script.py",
+        indoc! {r#"
+            # /// script
+            # [tool.ruff.lint]
+            # select = ['T201']
+            # [tool.ruff.format]
+            # quote-style = 'single'
+            # ///
+            print("hello")
+        "#},
+    )?;
+    for command in [vec!["check"], vec!["format", "--check"]] {
+        assert!(
+            test.command()
+                .args(&command)
+                .args(["--preview", "--isolated", "script.py"])
+                .output()?
+                .status
+                .success()
+        );
+        assert_eq!(
+            test.command()
+                .args(&command)
+                .args(["--preview", "script.py"])
+                .output()?
+                .status
+                .code(),
+            Some(1)
+        );
+    }
+    Ok(())
+}
+
+#[test]
 fn invalid_script_python_requirement() -> Result<()> {
     let test = CliTest::with_file("script.py", "")?;
     for requirement in ["'<3.12'", "'>=4'", "'invalid'", "42"] {

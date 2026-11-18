@@ -65,6 +65,13 @@ impl FileCacheKey {
         settings.cache_key(&mut hasher);
         self.script_settings = Some(hasher.finish());
     }
+
+    pub(crate) fn after_write(self, path: &Path) -> io::Result<Self> {
+        Ok(Self {
+            script_settings: self.script_settings,
+            ..Self::from_path(path)?
+        })
+    }
 }
 
 /// Cache.
@@ -1111,7 +1118,7 @@ mod tests {
             let file_path = self.package_root.join(path);
             format_path(
                 &file_path,
-                &self.project.settings.formatter,
+                &self.project.with_overrides(&ConfigArguments::default()),
                 SourceType::Python(PySourceType::Python),
                 FormatMode::Write,
                 None,
