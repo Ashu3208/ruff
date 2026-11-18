@@ -16,12 +16,14 @@ use rustc_hash::FxHashMap;
 use ruff_db::panic::catch_unwind;
 use ruff_linter::package::PackageRoot;
 use ruff_linter::registry::Rule;
+use ruff_linter::settings::flags;
 use ruff_linter::settings::types::UnsafeFixes;
-use ruff_linter::settings::{LinterSettings, flags};
 use ruff_linter::{IOError, Violation, fs, warn_user_once};
 use ruff_source_file::SourceFileBuilder;
 use ruff_text_size::TextRange;
-use ruff_workspace::resolver::{ResolvedFile, RootProject, match_exclusion, project_files_in_path};
+use ruff_workspace::resolver::{
+    ResolvedFile, RootProject, SettingsForSource, match_exclusion, project_files_in_path,
+};
 
 use crate::args::ConfigArguments;
 use crate::cache::{Cache, PackageCacheMap, PackageCaches};
@@ -71,7 +73,11 @@ pub(crate) fn check(
 
     // Load the caches.
     let caches = if cache.is_enabled() {
-        Some(PackageCacheMap::init(&package_roots, &resolver))
+        Some(PackageCacheMap::init(
+            &package_roots,
+            &resolver,
+            config_arguments,
+        ))
     } else {
         None
     };
@@ -86,13 +92,13 @@ pub(crate) fn check(
                     .and_then(|parent| package_roots.get(parent))
                     .and_then(|package| *package);
 
-                let settings = resolver.resolve(path);
+                let project = resolver.resolve_with_path(path);
 
-                if (settings.file_resolver.force_exclude || !resolved_file.is_root())
+                if (project.settings.file_resolver.force_exclude || !resolved_file.is_root())
                     && match_exclusion(
                         resolved_file.path(),
                         resolved_file.file_name(),
-                        &settings.linter.exclude,
+                        &project.settings.linter.exclude,
                     )
                 {
                     return None;
@@ -106,7 +112,7 @@ pub(crate) fn check(
                 lint_path(
                     path,
                     package,
-                    &settings.linter,
+                    &project.with_overrides(config_arguments),
                     cache,
                     noqa,
                     fix_mode,
@@ -194,7 +200,7 @@ pub(crate) fn check(
 fn lint_path(
     path: &Path,
     package: Option<PackageRoot<'_>>,
-    settings: &LinterSettings,
+    settings: &SettingsForSource<'_, ConfigArguments>,
     cache: Option<&Cache>,
     noqa: flags::Noqa,
     fix_mode: flags::FixMode,

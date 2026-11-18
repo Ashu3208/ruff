@@ -110,7 +110,11 @@ pub(crate) fn format(
         #[cfg(debug_assertions)]
         crate::warn_user!("Detected debug build without --no-cache.");
 
-        Some(PackageCacheMap::init(&package_roots, &resolver))
+        Some(PackageCacheMap::init(
+            &package_roots,
+            &resolver,
+            config_arguments,
+        ))
     };
 
     let start = Instant::now();

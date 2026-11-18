@@ -10,7 +10,7 @@ use std::path::Path;
 use anyhow::{Context, Result};
 use colored::Colorize;
 use log::{debug, warn};
-use ruff_db::diagnostic::Diagnostic;
+use ruff_db::diagnostic::{Annotation, Diagnostic, DiagnosticId, Severity, Span};
 use ruff_linter::codes::Rule;
 use ruff_linter::linter::{FixTable, FixerResult, LinterResult, ParseSource, lint_fix, lint_only};
 use ruff_linter::package::PackageRoot;
@@ -24,8 +24,10 @@ use ruff_python_ast::{SourceType, TomlSourceType};
 use ruff_source_file::SourceFileBuilder;
 use ruff_text_size::TextRange;
 use ruff_workspace::Settings;
+use ruff_workspace::resolver::SettingsForSource;
 use rustc_hash::FxHashMap;
 
+use crate::args::ConfigArguments;
 use crate::cache::{Cache, FileCache, FileCacheKey};
 
 /// A collection of [`Diagnostic`]s and additional information needed to render them.
@@ -182,14 +184,15 @@ impl AddAssign for FixMap {
 pub(crate) fn lint_path(
     path: &Path,
     package: Option<PackageRoot<'_>>,
-    settings: &LinterSettings,
+    project: &SettingsForSource<'_, ConfigArguments>,
     cache: Option<&Cache>,
     noqa: flags::Noqa,
     fix_mode: flags::FixMode,
     unsafe_fixes: UnsafeFixes,
 ) -> Result<Diagnostics> {
+    let settings = &project.project_settings().linter;
     // Check the cache.
-    let caching = match cache {
+    let mut caching = match cache {
         Some(cache) if noqa.is_enabled() => {
             let relative_path = cache
                 .relative_path(path)
@@ -283,6 +286,36 @@ pub(crate) fn lint_path(
             return Ok(Diagnostics::from_source_error(&err, Some(path), settings));
         }
     };
+
+    let script = match project.resolve_script(
+        Some(path),
+        SourceType::Python(source_type),
+        source_kind.source_code(),
+    ) {
+        Ok(script) => script,
+        Err(error) => {
+            let file = SourceFileBuilder::new(path.to_string_lossy(), "").finish();
+            let mut diagnostic = Diagnostic::new(
+                DiagnosticId::InvalidScriptMetadata,
+                Severity::Error,
+                format_args!("{error:#}"),
+            );
+            diagnostic.annotate(Annotation::primary(Span::from(file)));
+            return Ok(Diagnostics::new(vec![diagnostic], FxHashMap::default()));
+        }
+    };
+    if let Some((cache, relative_path, key)) = &mut caching
+        && let Some(script) = &script
+    {
+        key.set_script_settings(&script.settings);
+        if cache.get(relative_path, key).is_some_and(FileCache::linted) {
+            return Ok(Diagnostics::default());
+        }
+    }
+    let settings = script
+        .as_ref()
+        .map_or(settings, |script| &script.settings.linter);
+    let package = project.package_root(path, package, settings);
 
     // Lint the file.
     let (result, transformed, fixed) =
