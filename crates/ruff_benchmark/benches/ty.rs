@@ -2668,6 +2668,17 @@ fn benchmark_repeated_statement_calls(criterion: &mut Criterion) {
         benchmark_micro_case(criterion, name, &code);
     }
 
+    let mut code = String::from("def f() -> None:\n");
+    for index in 0..1_500 {
+        writeln!(code, "    value_{index} = 'abc'").ok();
+        writeln!(code, "    value_{index}.upper()").ok();
+    }
+    benchmark_micro_case(
+        criterion,
+        "ty_micro[repeated_statement_calls_distinct_locals]",
+        &code,
+    );
+
     let cases = [
         (
             "ty_micro[repeated_statement_calls_in_try]",
